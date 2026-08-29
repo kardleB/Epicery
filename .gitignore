@@ -1,10 +1,19 @@
 *.iml
 .gradle/
 /local.properties
-/.idea/
+.idea/
 .DS_Store
-/build/
-/captures/
-.externalNativeBuild/
-.cxx/
+**/build/
+/captures
+.externalNativeBuild
+.cxx
 local.properties
+
+# Android Studio
+*.hprof
+
+# Firebase
+app/google-services.json
+
+# Gradle
+!gradle/wrapper/gradle-wrapper.jar
