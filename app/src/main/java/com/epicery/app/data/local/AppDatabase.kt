@@ -18,4 +18,7 @@ import androidx.room.TypeConverters
 @TypeConverters(FoodGroupConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun groceryItemDao(): GroceryItemDao
+    abstract fun foodItemDao(): FoodItemDao
+    abstract fun priceHistoryDao(): PriceHistoryDao
+    abstract fun shoppingListDao(): ShoppingListDao
 }
