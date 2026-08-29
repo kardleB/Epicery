@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -69,10 +70,12 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
-    // Firebase: agregar app/google-services.json y aplicar el plugin
-    // com.google.gms.google-services antes de usar Analytics/Firestore/etc.
+    // Firebase (plan gratuito Spark): requiere app/google-services.json real,
+    // descargado desde la consola de Firebase del proyecto (ver README).
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
