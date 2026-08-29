@@ -13,7 +13,7 @@ import androidx.room.TypeConverters
         ShoppingListItemEntity::class
     ],
     version = 2,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(FoodGroupConverter::class)
 abstract class AppDatabase : RoomDatabase() {

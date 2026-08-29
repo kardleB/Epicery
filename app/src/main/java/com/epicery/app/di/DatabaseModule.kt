@@ -2,6 +2,8 @@ package com.epicery.app.di
 
 import android.content.Context
 import androidx.room.Room
+import com.epicery.app.BuildConfig
+import com.epicery.app.data.local.APP_DATABASE_MIGRATIONS
 import com.epicery.app.data.local.AppDatabase
 import com.epicery.app.data.local.FoodItemDao
 import com.epicery.app.data.local.GroceryItemDao
@@ -21,10 +23,21 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, Constants.DATABASE_NAME)
-            .fallbackToDestructiveMigration()
-            .build()
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        val builder = Room.databaseBuilder(context, AppDatabase::class.java, Constants.DATABASE_NAME)
+            .addMigrations(*APP_DATABASE_MIGRATIONS)
+
+        // La recreacion destructiva del esquema solo se permite en builds de
+        // debug, como red de seguridad mientras se itera el modelo de datos.
+        // En produccion toda evolucion del esquema debe llegar via una
+        // Migration explicita en APP_DATABASE_MIGRATIONS para no perder los
+        // datos del usuario.
+        if (BuildConfig.DEBUG) {
+            builder.fallbackToDestructiveMigration()
+        }
+
+        return builder.build()
+    }
 
     @Provides
     fun provideGroceryItemDao(database: AppDatabase): GroceryItemDao = database.groceryItemDao()
