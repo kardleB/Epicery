@@ -19,7 +19,9 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, Constants.DATABASE_NAME).build()
+        Room.databaseBuilder(context, AppDatabase::class.java, Constants.DATABASE_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
 
     @Provides
     fun provideGroceryItemDao(database: AppDatabase): GroceryItemDao = database.groceryItemDao()
