@@ -68,6 +68,45 @@ en vez de hacer requests inválidos.
 > siempre actualiza la fila existente y nunca crea un duplicado. Ver el detalle en
 > `EnrichFoodItemWithUsdaDataUseCase.kt`.
 
+## Configuración de GroceryPulse / Apify (comparación de precios en Montreal)
+
+La app consume el actor de [Apify](https://apify.com) "Canadian Grocery Price Comparison" a
+través de `GroceryPulseApi` (en `data/remote`) para comparar precios de un artículo en
+supermercados de Montreal (RF3, RF5, CA4). `GetMontrealGroceryPricesUseCase` guarda cada
+cotización obtenida como un `PriceHistoryEntity`, integrándose con el tracking de precios y la
+estimación de presupuesto semanal existentes. Cada desarrollador/entorno necesita su propio
+token de Apify y el ID del actor al que esté suscripto; **ninguno de los dos se versiona**.
+
+Pasos para configurarla:
+
+1. Crear una cuenta en <https://apify.com> (tiene plan gratuito) y suscribirse al actor
+   "Canadian Grocery Price Comparison" (o a un actor equivalente de comparación de precios de
+   supermercados canadienses).
+2. Generar un token de API personal desde la consola de Apify.
+3. Agregar las siguientes líneas a `local.properties` (en la raíz del proyecto, ya está en
+   `.gitignore` junto con `sdk.dir`):
+
+   ```properties
+   APIFY_API_TOKEN=tu_token_aqui
+   APIFY_GROCERY_ACTOR_ID=usuario~nombre-del-actor
+   ```
+
+   Alternativamente, para builds de CI, se pueden definir las variables de entorno
+   `APIFY_API_TOKEN` y `APIFY_GROCERY_ACTOR_ID` en lugar de editar `local.properties`.
+4. Sincronizar Gradle: ambos valores quedan disponibles en tiempo de ejecución como
+   `BuildConfig.APIFY_API_TOKEN` / `BuildConfig.APIFY_GROCERY_ACTOR_ID` y son usados por
+   `GroceryPulseRepositoryImpl` al llamar a la API.
+
+Si `APIFY_API_TOKEN` o `APIFY_GROCERY_ACTOR_ID` no están configurados, las comparaciones de
+precio fallan con un error explícito en vez de hacer requests inválidos — es decir, cuando la
+API no está disponible/configurada, la app simplemente no obtiene precios comparativos, sin
+romper el resto del flujo (CA4).
+
+> **Nota:** el esquema de input/output de `GroceryPulseApi` (`GroceryPulseRequest` /
+> `GroceryPriceResponse`) asume los nombres de campo más comunes entre actores de scraping de
+> Apify (`query`, `city`, `store`, `price`, etc). Si el actor concreto al que se suscriba el
+> equipo usa otros nombres de campo, ajustar esas dos data classes en `data/remote`.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
