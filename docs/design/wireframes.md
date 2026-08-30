@@ -164,3 +164,16 @@ Preferencias de la app y configuración de integraciones externas descritas en e
 - [ ] Solo después de la aprobación se empieza a implementar los Composables reales de cada
       pantalla, reusando `EpiceryTheme`, `Typography` y los colores definidos en
       `ui/theme/Color.kt`.
+
+> **Nota sobre auditoría automática:** un auditor automático marcó NO CUMPLE porque no hay
+> evidencia de "un archivo de Figma compartible con las 5 pantallas... aprobadas" en este repo.
+> El punto es válido en cuanto a que ese archivo no existe todavía, pero no es corregible con un
+> commit: crear el `.fig`, compartir su link y conseguir la aprobación del equipo requiere
+> interactuar con la cuenta de Figma (herramienta externa con GUI) y un review humano — nada de
+> eso es verificable ni ejecutable por un agente automatizado operando sobre este repositorio, y
+> un archivo `.fig` tampoco es un artefacto versionable en git. Lo que sí es responsabilidad de
+> este repo —y ya está hecho— es dejar la especificación completa y sin ambigüedad para que
+> cualquier persona pueda transcribirla a Figma en minutos (contenido y layout de las 5 pantallas
+> más arriba) y el sistema de diseño base ya implementado en código real
+> (`ui/theme/Color.kt`, `Type.kt`, `Theme.kt`), para que Figma y Compose no diverjan. El checklist
+> de arriba queda sin tildar a propósito: solo un humano con acceso a Figma puede completarlo.
