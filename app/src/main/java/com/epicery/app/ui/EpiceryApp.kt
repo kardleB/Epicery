@@ -18,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.epicery.app.ui.budget.BudgetScreen
 import com.epicery.app.ui.common.ApiErrorBanner
 import com.epicery.app.ui.common.PlaceholderScreen
 import com.epicery.app.ui.home.HomeScreen
@@ -27,9 +28,9 @@ import com.epicery.app.ui.shoppinglist.ShoppingListScreen
 
 /**
  * Punto de entrada de la UI: aloja el `NavHost` con las 5 secciones principales y la bottom
- * navigation persistente entre ellas (ver `docs/design/wireframes.md`). Home, Shopping List y
- * Price Tracker están implementadas por completo; las demás son placeholders hasta que se hagan
- * en otra tarea.
+ * navigation persistente entre ellas (ver `docs/design/wireframes.md`). Home, Shopping List,
+ * Price Tracker y Budget están implementadas por completo; Ajustes queda como placeholder hasta
+ * que se haga en otra tarea.
  */
 @Composable
 fun EpiceryApp() {
@@ -61,7 +62,7 @@ fun EpiceryApp() {
                     PriceTrackerScreen()
                 }
                 composable(EpiceryDestination.Budget.route) {
-                    PlaceholderScreen(title = "Budget")
+                    BudgetScreen()
                 }
                 composable(EpiceryDestination.Settings.route) {
                     PlaceholderScreen(title = "Ajustes")
