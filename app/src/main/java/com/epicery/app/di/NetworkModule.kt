@@ -1,6 +1,7 @@
 package com.epicery.app.di
 
 import com.epicery.app.data.remote.EpiceryApiService
+import com.epicery.app.data.remote.GroceryPulseApi
 import com.epicery.app.data.remote.UsdaFoodDataApi
 import com.epicery.app.util.Constants
 import dagger.Module
@@ -53,4 +54,19 @@ object NetworkModule {
     @Singleton
     fun provideUsdaFoodDataApi(@Named("usda") retrofit: Retrofit): UsdaFoodDataApi =
         retrofit.create(UsdaFoodDataApi::class.java)
+
+    @Provides
+    @Singleton
+    @Named("apify")
+    fun provideApifyRetrofit(okHttpClient: OkHttpClient): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(Constants.APIFY_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideGroceryPulseApi(@Named("apify") retrofit: Retrofit): GroceryPulseApi =
+        retrofit.create(GroceryPulseApi::class.java)
 }

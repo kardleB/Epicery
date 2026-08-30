@@ -21,6 +21,17 @@ val localProperties = Properties().apply {
 val usdaApiKey: String =
     (localProperties.getProperty("USDA_API_KEY") ?: System.getenv("USDA_API_KEY") ?: "")
 
+// GroceryPulse (RF3, RF5, CA4) corre el actor de Apify "Canadian Grocery Price Comparison"
+// para comparar precios de supermercados en Montreal. El token de API y el ID del actor
+// suscrito tampoco se versionan (mismo mecanismo que USDA_API_KEY) porque son específicos
+// de la cuenta/plan de Apify de cada desarrollador — ver README.
+val apifyApiToken: String =
+    (localProperties.getProperty("APIFY_API_TOKEN") ?: System.getenv("APIFY_API_TOKEN") ?: "")
+val apifyGroceryActorId: String =
+    (localProperties.getProperty("APIFY_GROCERY_ACTOR_ID")
+        ?: System.getenv("APIFY_GROCERY_ACTOR_ID")
+        ?: "")
+
 android {
     namespace = "com.epicery.app"
     compileSdk = 35
@@ -35,6 +46,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "USDA_API_KEY", "\"$usdaApiKey\"")
+        buildConfigField("String", "APIFY_API_TOKEN", "\"$apifyApiToken\"")
+        buildConfigField("String", "APIFY_GROCERY_ACTOR_ID", "\"$apifyGroceryActorId\"")
     }
 
     buildTypes {

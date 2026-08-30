@@ -2,11 +2,13 @@ package com.epicery.app.di
 
 import com.epicery.app.data.repository.BudgetRepositoryImpl
 import com.epicery.app.data.repository.FoodRepositoryImpl
+import com.epicery.app.data.repository.GroceryPulseRepositoryImpl
 import com.epicery.app.data.repository.GroceryRepositoryImpl
 import com.epicery.app.data.repository.PriceRepositoryImpl
 import com.epicery.app.data.repository.UsdaFoodDataRepositoryImpl
 import com.epicery.app.domain.repository.BudgetRepository
 import com.epicery.app.domain.repository.FoodRepository
+import com.epicery.app.domain.repository.GroceryPulseRepository
 import com.epicery.app.domain.repository.GroceryRepository
 import com.epicery.app.domain.repository.PriceRepository
 import com.epicery.app.domain.repository.UsdaFoodDataRepository
@@ -39,4 +41,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUsdaFoodDataRepository(impl: UsdaFoodDataRepositoryImpl): UsdaFoodDataRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGroceryPulseRepository(impl: GroceryPulseRepositoryImpl): GroceryPulseRepository
 }
