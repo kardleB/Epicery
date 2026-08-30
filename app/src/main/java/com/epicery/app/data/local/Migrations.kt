@@ -114,8 +114,22 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
 }
 
 /**
+ * Migracion de la version 3 a la version 4, que agrega el estado de compra
+ * por item (RF2/CA1: marcar/desmarcar articulos como comprados en la
+ * pantalla de Shopping List) sin perder los items que el usuario ya tenga
+ * guardados en `grocery_items`.
+ */
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "ALTER TABLE `grocery_items` ADD COLUMN `isPurchased` INTEGER NOT NULL DEFAULT 0"
+        )
+    }
+}
+
+/**
  * Todas las migraciones conocidas de [AppDatabase], en orden. Cada vez que se
  * incremente `version` en [AppDatabase] hay que agregar aqui la migracion
  * correspondiente para que los datos existentes del usuario no se pierdan.
  */
-val APP_DATABASE_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+val APP_DATABASE_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)

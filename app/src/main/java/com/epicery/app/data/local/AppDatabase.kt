@@ -14,7 +14,7 @@ import androidx.room.TypeConverters
         UsdaNutritionCacheEntity::class,
         GroceryPriceCacheEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(FoodGroupConverter::class)

@@ -23,4 +23,16 @@ object Constants {
      * a la red; si está vencida pero no hay conexión, igual se usa como fallback.
      */
     const val API_CACHE_TTL_MS = 24 * 60 * 60 * 1000L
+
+    /** Timeout de red (conexión/lectura/escritura) para las llamadas a APIs externas. */
+    const val API_TIMEOUT_SECONDS = 15L
+
+    /**
+     * Cantidad de reintentos (sin contar el intento original) ante errores transitorios
+     * (timeouts, 5xx, 429 de rate limiting) antes de degradar a la cache local.
+     */
+    const val API_MAX_RETRIES = 2
+
+    /** Backoff base entre reintentos; crece exponencialmente (base * 2^intento). */
+    const val API_RETRY_BASE_DELAY_MS = 500L
 }

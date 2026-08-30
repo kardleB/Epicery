@@ -14,10 +14,18 @@ class GroceryRepositoryImpl @Inject constructor(
 
     override fun getGroceryItems(): Flow<List<GroceryItem>> =
         dao.getAll().map { entities ->
-            entities.map { GroceryItem(it.id, it.name, it.foodGroup, it.estimatedPrice) }
+            entities.map { GroceryItem(it.id, it.name, it.foodGroup, it.estimatedPrice, it.isPurchased) }
         }
 
     override suspend fun addGroceryItem(item: GroceryItem) {
-        dao.insert(GroceryItemEntity(item.id, item.name, item.foodGroup, item.estimatedPrice))
+        dao.insert(
+            GroceryItemEntity(item.id, item.name, item.foodGroup, item.estimatedPrice, item.isPurchased)
+        )
+    }
+
+    override suspend fun updateGroceryItem(item: GroceryItem) {
+        dao.update(
+            GroceryItemEntity(item.id, item.name, item.foodGroup, item.estimatedPrice, item.isPurchased)
+        )
     }
 }

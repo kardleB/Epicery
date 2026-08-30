@@ -3,19 +3,24 @@ package com.epicery.app.data.repository
 import com.epicery.app.BuildConfig
 import com.epicery.app.data.local.GroceryPriceCacheDao
 import com.epicery.app.data.local.GroceryPriceCacheEntity
+import com.epicery.app.data.remote.ApiErrorState
 import com.epicery.app.data.remote.GroceryPriceResponse
 import com.epicery.app.data.remote.GroceryPulseApi
 import com.epicery.app.data.remote.GroceryPulseRequest
+import com.epicery.app.data.remote.toApiFailureReason
 import com.epicery.app.domain.model.GroceryPriceQuote
 import com.epicery.app.domain.repository.GroceryPulseRepository
 import com.epicery.app.util.Constants
-import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 /**
  * Cachea las cotizaciones de GroceryPulse (Apify) en Room, indexadas por término de
  * búsqueda (RNF5): si la cache está vigente evita la llamada de red, y si la llamada
- * falla por falta de conexión devuelve la última respuesta cacheada en vez de fallar.
+ * falla — timeout, error del servidor o rate limiting — devuelve la última respuesta
+ * cacheada en vez de fallar. La llamada de red en sí ya reintenta errores transitorios
+ * (ver `RetryInterceptor`); este catch es la última línea de defensa para que un fallo
+ * de API nunca tire abajo la app.
  */
 class GroceryPulseRepositoryImpl @Inject constructor(
     private val api: GroceryPulseApi,
@@ -48,9 +53,13 @@ class GroceryPulseRepositoryImpl @Inject constructor(
                 .mapNotNull { it.toGroceryPriceQuoteOrNull() }
             val fetchedAt = System.currentTimeMillis()
             cacheDao.replaceForQuery(normalizedQuery, quotes.map { it.toCacheEntity(normalizedQuery, fetchedAt) })
+            ApiErrorState.clear()
             quotes
-        } catch (e: IOException) {
-            if (cached.isNotEmpty()) cached.map { it.toGroceryPriceQuote() } else throw e
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ApiErrorState.report(source = "GroceryPulse", reason = e.toApiFailureReason())
+            cached.map { it.toGroceryPriceQuote() }
         }
     }
 }
