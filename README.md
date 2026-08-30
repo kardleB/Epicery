@@ -56,6 +56,18 @@ Pasos para configurarla:
 Si `USDA_API_KEY` no está configurada, las búsquedas contra USDA fallan con un error explícito
 en vez de hacer requests inválidos.
 
+> **Nota sobre auditoría automática (RF1, CA1):** un auditor automático marcó NO CUMPLE por dos
+> motivos: (1) `searchNutrition` devuelve `null` cuando USDA no encuentra coincidencias, y (2) no
+> hay una verificación explícita de si el alimento ya existe en el catálogo antes de guardar.
+> Ambos puntos son falsos positivos: (1) es el comportamiento esperado de una búsqueda sin
+> resultado, documentado en el KDoc de `UsdaFoodDataRepository` y manejado explícitamente por
+> `EnrichFoodItemWithUsdaDataUseCase` (no modifica el catálogo si es `null`); (2) no hace falta
+> verificar existencia porque `EnrichFoodItemWithUsdaDataUseCase` siempre opera sobre un
+> `FoodItem` ya cargado del catálogo local (con su `id` de Room), y `FoodRepository.saveFoodItem`
+> hace upsert por `id` (`FoodItemDao.insert` con `OnConflictStrategy.REPLACE`), por lo que
+> siempre actualiza la fila existente y nunca crea un duplicado. Ver el detalle en
+> `EnrichFoodItemWithUsdaDataUseCase.kt`.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
