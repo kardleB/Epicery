@@ -15,4 +15,12 @@ object Constants {
 
     /** Ciudad usada para comparar precios de supermercados con GroceryPulse (RF3, RF5, CA4). */
     const val MONTREAL_CITY = "Montreal"
+
+    /**
+     * Vigencia de la cache persistida de respuestas de APIs externas (USDA FoodData,
+     * GroceryPulse) antes de intentar refrescarla con una nueva llamada de red (RNF5).
+     * Mientras una entrada esté dentro de esta ventana, se sirve desde Room sin llamar
+     * a la red; si está vencida pero no hay conexión, igual se usa como fallback.
+     */
+    const val API_CACHE_TTL_MS = 24 * 60 * 60 * 1000L
 }

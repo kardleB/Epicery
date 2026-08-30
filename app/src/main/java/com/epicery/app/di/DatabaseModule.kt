@@ -7,8 +7,10 @@ import com.epicery.app.data.local.APP_DATABASE_MIGRATIONS
 import com.epicery.app.data.local.AppDatabase
 import com.epicery.app.data.local.FoodItemDao
 import com.epicery.app.data.local.GroceryItemDao
+import com.epicery.app.data.local.GroceryPriceCacheDao
 import com.epicery.app.data.local.PriceHistoryDao
 import com.epicery.app.data.local.ShoppingListDao
+import com.epicery.app.data.local.UsdaNutritionCacheDao
 import com.epicery.app.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -50,4 +52,12 @@ object DatabaseModule {
 
     @Provides
     fun provideShoppingListDao(database: AppDatabase): ShoppingListDao = database.shoppingListDao()
+
+    @Provides
+    fun provideUsdaNutritionCacheDao(database: AppDatabase): UsdaNutritionCacheDao =
+        database.usdaNutritionCacheDao()
+
+    @Provides
+    fun provideGroceryPriceCacheDao(database: AppDatabase): GroceryPriceCacheDao =
+        database.groceryPriceCacheDao()
 }

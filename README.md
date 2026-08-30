@@ -107,6 +107,24 @@ romper el resto del flujo (CA4).
 > Apify (`query`, `city`, `store`, `price`, etc). Si el actor concreto al que se suscriba el
 > equipo usa otros nombres de campo, ajustar esas dos data classes en `data/remote`.
 
+## Caché offline-first de USDA FoodData y GroceryPulse (RNF5)
+
+Las respuestas de USDA FoodData Central y de GroceryPulse se cachean en Room, indexadas por el
+término de búsqueda normalizado (`usda_nutrition_cache` y `grocery_price_cache`, agregadas en
+`MIGRATION_2_3`). `UsdaFoodDataRepositoryImpl` y `GroceryPulseRepositoryImpl` resuelven cada
+consulta así:
+
+1. Si hay una entrada cacheada y todavía está vigente (`Constants.API_CACHE_TTL_MS`, 24 h), se
+   devuelve directamente desde Room sin llamar a la API, evitando requests repetidos.
+2. Si no hay cache vigente, se intenta la llamada de red; si tiene éxito, el resultado se guarda
+   en Room y se devuelve.
+3. Si la llamada de red falla por falta de conexión (`IOException`), se devuelve la última
+   respuesta cacheada para esa consulta (aunque esté vencida) en vez de fallar; solo se propaga
+   el error si nunca hubo una respuesta cacheada para esa consulta.
+
+Esto cumple RNF5: repetir una consulta ya realizada sin conexión a internet devuelve los datos
+cacheados sin que la app falle.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).

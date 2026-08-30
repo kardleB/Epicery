@@ -77,8 +77,45 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 
 /**
+ * Migracion de la version 2 a la version 3, que agrega las tablas de cache
+ * persistida de respuestas de USDA FoodData Central y de GroceryPulse
+ * (RNF5: soporte offline-first, evita repetir llamadas de red ya resueltas).
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `usda_nutrition_cache` (" +
+                "`query` TEXT NOT NULL PRIMARY KEY, " +
+                "`fdcId` INTEGER NOT NULL, " +
+                "`description` TEXT NOT NULL, " +
+                "`calories` REAL NOT NULL, " +
+                "`proteinGrams` REAL NOT NULL, " +
+                "`sodiumMg` REAL NOT NULL, " +
+                "`sugarGrams` REAL NOT NULL, " +
+                "`fetchedAt` INTEGER NOT NULL)"
+        )
+
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `grocery_price_cache` (" +
+                "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`query` TEXT NOT NULL, " +
+                "`storeName` TEXT NOT NULL, " +
+                "`productName` TEXT NOT NULL, " +
+                "`price` REAL NOT NULL, " +
+                "`currency` TEXT NOT NULL, " +
+                "`city` TEXT NOT NULL, " +
+                "`sourceUrl` TEXT, " +
+                "`fetchedAt` INTEGER NOT NULL)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_grocery_price_cache_query` ON `grocery_price_cache` (`query`)"
+        )
+    }
+}
+
+/**
  * Todas las migraciones conocidas de [AppDatabase], en orden. Cada vez que se
  * incremente `version` en [AppDatabase] hay que agregar aqui la migracion
  * correspondiente para que los datos existentes del usuario no se pierdan.
  */
-val APP_DATABASE_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2)
+val APP_DATABASE_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
