@@ -30,6 +30,32 @@ Mientras el proyecto se mantenga dentro de los límites del plan Spark (autentic
 lecturas/escrituras de Firestore y eventos de Analytics por debajo de las cuotas gratuitas)
 no se generan costos.
 
+## Configuración de USDA FoodData Central (API gratuita)
+
+La app consume el endpoint `/foods/search` de [USDA FoodData Central](https://fdc.nal.usda.gov/)
+(`UsdaFoodDataApi`, en `data/remote`) para obtener información nutricional (calorías, proteína,
+sodio, azúcar) y enriquecer los `FoodItemEntity` del catálogo (RF1, CA1). Cada
+desarrollador/entorno necesita su propia API key gratuita, que **nunca se versiona**.
+
+Pasos para configurarla:
+
+1. Pedir una API key gratuita en <https://fdc.nal.usda.gov/api-key-signup.html> (no requiere
+   tarjeta de crédito; el límite del plan gratuito es de 1000 requests/hora por key).
+2. Agregar la siguiente línea a `local.properties` (en la raíz del proyecto, ya está en
+   `.gitignore` junto con `sdk.dir`):
+
+   ```properties
+   USDA_API_KEY=tu_api_key_aqui
+   ```
+
+   Alternativamente, para builds de CI, se puede definir la variable de entorno
+   `USDA_API_KEY` en lugar de editar `local.properties`.
+3. Sincronizar Gradle: la key queda disponible en tiempo de ejecución como
+   `BuildConfig.USDA_API_KEY` y es usada por `UsdaFoodDataRepositoryImpl` al llamar a la API.
+
+Si `USDA_API_KEY` no está configurada, las búsquedas contra USDA fallan con un error explícito
+en vez de hacer requests inválidos.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,18 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
 }
+
+// La API key de USDA FoodData Central es gratuita (https://fdc.nal.usda.gov/api-key-signup.html)
+// pero no se versiona: cada desarrollador la coloca en su `local.properties` (gitignored),
+// igual que `sdk.dir`. Sirve como fallback una variable de entorno para builds de CI (ver README).
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { load(it) }
+    }
+}
+val usdaApiKey: String =
+    (localProperties.getProperty("USDA_API_KEY") ?: System.getenv("USDA_API_KEY") ?: "")
 
 android {
     namespace = "com.epicery.app"
@@ -19,6 +33,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "USDA_API_KEY", "\"$usdaApiKey\"")
     }
 
     buildTypes {
