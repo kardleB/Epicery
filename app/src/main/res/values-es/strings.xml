@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Epicery</string>
+
+    <string name="add_item">Agregar item</string>
+    <string name="label_name">Nombre</string>
+    <string name="label_food_group">Grupo alimenticio</string>
+    <string name="label_estimated_price">Precio estimado</string>
+    <string name="label_product">Producto</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_see_all">Ver todo</string>
+    <string name="filter_all">Todos</string>
+    <string name="empty_add_first_item">Agregá tu primer producto</string>
+    <string name="format_amount_of_amount">%1$s de %2$s</string>
+
+    <string name="food_group_fruits">Frutas</string>
+    <string name="food_group_vegetables">Vegetales</string>
+    <string name="food_group_grains">Granos</string>
+    <string name="food_group_protein">Proteínas</string>
+    <string name="food_group_dairy">Lácteos</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_shopping_list">Lista</string>
+    <string name="nav_price_tracker">Precios</string>
+
+    <string name="home_empty_title">Todavía no tenés una lista de compras</string>
+    <string name="home_empty_cta">Crear tu primera lista de compras</string>
+    <string name="home_weekly_budget_title">Presupuesto semanal</string>
+    <string name="home_weekly_budget_used">%1$s de %2$s usados</string>
+    <string name="home_shopping_list_title">Tu lista de compras</string>
+    <string name="home_food_groups_title">Grupos alimenticios</string>
+
+    <string name="budget_title">Presupuesto</string>
+    <string name="budget_monthly_projection_title">Proyección mensual</string>
+    <string name="budget_monthly_projection_body">%1$s estimados este mes, según el ritmo de gasto semanal</string>
+    <string name="budget_monthly_budget_estimate">Presupuesto mensual estimado: %1$s</string>
+    <string name="budget_monthly_over">La proyección supera el presupuesto mensual por %1$s</string>
+    <string name="budget_weekly_spent_title">Gasto semanal</string>
+    <string name="budget_remaining">Restan %1$s esta semana</string>
+    <string name="budget_over">Superaste el presupuesto semanal por %1$s</string>
+    <string name="budget_spending_by_category_title">Gasto por categoría</string>
+    <string name="budget_no_purchases">Todavía no marcaste ningún item como comprado</string>
+
+    <string name="price_tracker_title">Seguimiento de precios</string>
+    <string name="price_tracker_hint_select_product">Seleccioná un producto para ver su histórico de precios</string>
+    <string name="price_tracker_hint_no_history">Todavía no hay suficiente histórico de precios para %1$s</string>
+    <string name="price_tracker_high_price_alert">Precio alto: %1$s supera el promedio histórico de %2$s</string>
+    <string name="price_tracker_trend_label">Tendencia: %1$s</string>
+    <string name="price_tracker_latest_avg">Último precio: %1$s · Promedio: %2$s</string>
+    <string name="trend_up">Sube</string>
+    <string name="trend_down">Baja</string>
+    <string name="trend_stable">Estable</string>
+
+    <string name="shopping_list_title">Lista de compras</string>
+    <string name="shopping_list_total_estimated_title">Total estimado</string>
+    <string name="shopping_list_edit_price_title">Editar precio de %1$s</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_section_preferences">Preferencias</string>
+    <string name="settings_use_without_account_title">Usar la app sin cuenta</string>
+    <string name="settings_use_without_account_desc">Los datos se guardan solo en este dispositivo, sin sincronizar con la nube</string>
+    <string name="settings_label_language">Idioma</string>
+    <string name="settings_label_favorite_supermarket">Supermercado favorito</string>
+    <string name="settings_supermarket_undefined">Sin definir</string>
+    <string name="settings_label_default_weekly_budget">Presupuesto semanal por defecto</string>
+
+    <string name="api_error_rate_limited">Se alcanzó el límite de consultas a la API. Mostrando datos guardados localmente.</string>
+    <string name="api_error_timeout">La API tardó demasiado en responder. Mostrando datos guardados localmente.</string>
+    <string name="api_error_server_error">La API no está disponible en este momento. Mostrando datos guardados localmente.</string>
+    <string name="api_error_client_error">No se pudo completar la consulta a la API. Mostrando datos guardados localmente.</string>
+    <string name="api_error_network_error">Sin conexión a internet. Mostrando datos guardados localmente.</string>
+    <string name="api_error_config_error">La API no está configurada. Mostrando datos guardados localmente.</string>
+    <string name="api_error_unknown">No se pudo completar la consulta a la API. Mostrando datos guardados localmente.</string>
+</resources>

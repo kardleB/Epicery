@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Francais (par defaut) -- marche cible principale : Quebec (RF6, CA4). -->
+<!-- Francais explicite (identique a values/, el default ya es frances para Quebec). -->
 <resources>
     <string name="app_name">Epicery</string>
 

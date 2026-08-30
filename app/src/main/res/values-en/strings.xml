@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Epicery</string>
+
+    <string name="add_item">Add item</string>
+    <string name="label_name">Name</string>
+    <string name="label_food_group">Food group</string>
+    <string name="label_estimated_price">Estimated price</string>
+    <string name="label_product">Product</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_see_all">See all</string>
+    <string name="filter_all">All</string>
+    <string name="empty_add_first_item">Add your first item</string>
+    <string name="format_amount_of_amount">%1$s of %2$s</string>
+
+    <string name="food_group_fruits">Fruits</string>
+    <string name="food_group_vegetables">Vegetables</string>
+    <string name="food_group_grains">Grains</string>
+    <string name="food_group_protein">Protein</string>
+    <string name="food_group_dairy">Dairy</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_shopping_list">List</string>
+    <string name="nav_price_tracker">Prices</string>
+
+    <string name="home_empty_title">You don\'t have a shopping list yet</string>
+    <string name="home_empty_cta">Create your first shopping list</string>
+    <string name="home_weekly_budget_title">Weekly budget</string>
+    <string name="home_weekly_budget_used">%1$s of %2$s used</string>
+    <string name="home_shopping_list_title">Your shopping list</string>
+    <string name="home_food_groups_title">Food groups</string>
+
+    <string name="budget_title">Budget</string>
+    <string name="budget_monthly_projection_title">Monthly projection</string>
+    <string name="budget_monthly_projection_body">%1$s estimated this month, based on your weekly spending pace</string>
+    <string name="budget_monthly_budget_estimate">Estimated monthly budget: %1$s</string>
+    <string name="budget_monthly_over">The projection exceeds the monthly budget by %1$s</string>
+    <string name="budget_weekly_spent_title">Weekly spending</string>
+    <string name="budget_remaining">%1$s left this week</string>
+    <string name="budget_over">You went over the weekly budget by %1$s</string>
+    <string name="budget_spending_by_category_title">Spending by category</string>
+    <string name="budget_no_purchases">You haven\'t marked any item as purchased yet</string>
+
+    <string name="price_tracker_title">Price Tracker</string>
+    <string name="price_tracker_hint_select_product">Select a product to see its price history</string>
+    <string name="price_tracker_hint_no_history">There isn\'t enough price history yet for %1$s</string>
+    <string name="price_tracker_high_price_alert">High price: %1$s is above the historical average of %2$s</string>
+    <string name="price_tracker_trend_label">Trend: %1$s</string>
+    <string name="price_tracker_latest_avg">Latest price: %1$s · Average: %2$s</string>
+    <string name="trend_up">Up</string>
+    <string name="trend_down">Down</string>
+    <string name="trend_stable">Stable</string>
+
+    <string name="shopping_list_title">Shopping List</string>
+    <string name="shopping_list_total_estimated_title">Estimated total</string>
+    <string name="shopping_list_edit_price_title">Edit price for %1$s</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_preferences">Preferences</string>
+    <string name="settings_use_without_account_title">Use the app without an account</string>
+    <string name="settings_use_without_account_desc">Data is saved only on this device, without syncing to the cloud</string>
+    <string name="settings_label_language">Language</string>
+    <string name="settings_label_favorite_supermarket">Favorite supermarket</string>
+    <string name="settings_supermarket_undefined">Not set</string>
+    <string name="settings_label_default_weekly_budget">Default weekly budget</string>
+
+    <string name="api_error_rate_limited">The API request limit was reached. Showing locally saved data.</string>
+    <string name="api_error_timeout">The API took too long to respond. Showing locally saved data.</string>
+    <string name="api_error_server_error">The API is currently unavailable. Showing locally saved data.</string>
+    <string name="api_error_client_error">The API request could not be completed. Showing locally saved data.</string>
+    <string name="api_error_network_error">No internet connection. Showing locally saved data.</string>
+    <string name="api_error_config_error">The API is not configured. Showing locally saved data.</string>
+    <string name="api_error_unknown">The API request could not be completed. Showing locally saved data.</string>
+</resources>
