@@ -4,5 +4,6 @@ data class GroceryItem(
     val id: Long = 0,
     val name: String,
     val foodGroup: String,
-    val estimatedPrice: Double
+    val estimatedPrice: Double,
+    val isPurchased: Boolean = false
 )
