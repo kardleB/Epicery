@@ -22,11 +22,12 @@ import com.epicery.app.ui.common.ApiErrorBanner
 import com.epicery.app.ui.common.PlaceholderScreen
 import com.epicery.app.ui.home.HomeScreen
 import com.epicery.app.ui.navigation.EpiceryDestination
+import com.epicery.app.ui.shoppinglist.ShoppingListScreen
 
 /**
  * Punto de entrada de la UI: aloja el `NavHost` con las 5 secciones principales y la bottom
- * navigation persistente entre ellas (ver `docs/design/wireframes.md`). Solo Home está
- * implementada por completo; las demás son placeholders hasta que se hagan en otra tarea.
+ * navigation persistente entre ellas (ver `docs/design/wireframes.md`). Home y Shopping List están
+ * implementadas por completo; las demás son placeholders hasta que se hagan en otra tarea.
  */
 @Composable
 fun EpiceryApp() {
@@ -52,7 +53,7 @@ fun EpiceryApp() {
                     )
                 }
                 composable(EpiceryDestination.ShoppingList.route) {
-                    PlaceholderScreen(title = "Lista de compras")
+                    ShoppingListScreen()
                 }
                 composable(EpiceryDestination.PriceTracker.route) {
                     PlaceholderScreen(title = "Price Tracker")
