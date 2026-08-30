@@ -100,6 +100,10 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // DataStore Preferences (RF5, RNF4): persiste los ajustes de usuario (Settings) entre
+    // sesiones sin depender de una cuenta ni de la red.
+    implementation(libs.androidx.datastore.preferences)
+
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.gson)
     implementation(libs.okhttp.logging.interceptor)

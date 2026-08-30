@@ -5,12 +5,14 @@ import com.epicery.app.data.repository.FoodRepositoryImpl
 import com.epicery.app.data.repository.GroceryPulseRepositoryImpl
 import com.epicery.app.data.repository.GroceryRepositoryImpl
 import com.epicery.app.data.repository.PriceRepositoryImpl
+import com.epicery.app.data.repository.SettingsRepositoryImpl
 import com.epicery.app.data.repository.UsdaFoodDataRepositoryImpl
 import com.epicery.app.domain.repository.BudgetRepository
 import com.epicery.app.domain.repository.FoodRepository
 import com.epicery.app.domain.repository.GroceryPulseRepository
 import com.epicery.app.domain.repository.GroceryRepository
 import com.epicery.app.domain.repository.PriceRepository
+import com.epicery.app.domain.repository.SettingsRepository
 import com.epicery.app.domain.repository.UsdaFoodDataRepository
 import dagger.Binds
 import dagger.Module
@@ -45,4 +47,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGroceryPulseRepository(impl: GroceryPulseRepositoryImpl): GroceryPulseRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
 }
