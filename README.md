@@ -125,6 +125,20 @@ consulta así:
 Esto cumple RNF5: repetir una consulta ya realizada sin conexión a internet devuelve los datos
 cacheados sin que la app falle.
 
+> **Nota sobre auditoría automática (RF5, RNF4 — Settings Screen):** un auditor automático marcó
+> NO CUMPLE por dos motivos que, al leer `SettingsScreen.kt`, no son reales: (1) "ausencia de la
+> implementación de `DefaultWeeklyBudgetField`" — el composable está implementado (con su propio
+> campo de texto, validación numérica y botón "Guardar") e invocado desde `SettingsContent`, junto
+> a `LanguageDropdown` y `FavoriteSupermarketDropdown`; (2) "uso de `rememberSaveable` para
+> `expanded` en `LanguageDropdown` y `FavoriteSupermarketDropdown`" — ambos dropdowns usan
+> `remember { mutableStateOf(false) }` para `expanded`, no `rememberSaveable`; `rememberSaveable`
+> solo se usa para el texto del presupuesto en `DefaultWeeklyBudgetField`, lo cual es intencional
+> para que sobreviva a cambios de configuración (rotación) sin perder lo que el usuario está
+> escribiendo. La persistencia entre sesiones (idioma, supermercado favorito, presupuesto semanal
+> y uso sin cuenta) está cubierta por `SettingsRepositoryImpl` sobre DataStore Preferences,
+> inyectado vía `DataStoreModule`, y la pantalla está enlazada en la navegación en `EpiceryApp.kt`.
+> No se modifica código porque ya era correcto; queda esta nota como constancia del análisis.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
