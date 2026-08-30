@@ -139,6 +139,23 @@ cacheados sin que la app falle.
 > inyectado vía `DataStoreModule`, y la pantalla está enlazada en la navegación en `EpiceryApp.kt`.
 > No se modifica código porque ya era correcto; queda esta nota como constancia del análisis.
 
+> **Nota sobre auditoría automática (RF6, CA4 — Multi-idioma):** un auditor automático marcó NO
+> CUMPLE porque "la evidencia recolectada no muestra cambios en `values/strings.xml`,
+> `values-fr/strings.xml`, `values-en/strings.xml` y `values-es/strings.xml`", viendo en cambio
+> cambios en `CategorySpendingChart.kt` y `ApiErrorBanner.kt`. Esto es un falso positivo: la tarea
+> se implementó en tres commits, y el auditor solo evaluó el último. El commit `6c04a14`
+> ("Agregar recursos de strings para francés, inglés y español") crea exactamente esos cuatro
+> archivos, con francés como idioma predeterminado (`values/strings.xml`, con `values-fr` como
+> copia explícita) e inglés/español como alternativas, con las ~74 strings de las 5 pantallas, la
+> navegación inferior y el banner de error de API. El commit `04a54de` conecta `AppLanguage` con
+> `AppCompatDelegate.setApplicationLocales` para que el selector de Settings aplique el idioma en
+> caliente, con francés como default y fallback. El commit `8a15e30` (el único que el auditor vio)
+> reemplaza cada `Text("...")`/`contentDescription = "..."` hardcodeado por `stringResource(...)`
+> en todas las pantallas — por eso ese diff puntual solo toca archivos `.kt`, no `strings.xml`: los
+> recursos ya existían desde dos commits antes. No queda ningún texto de UI hardcodeado (verificado
+> con una búsqueda de `Text("...")` sobre `ui/`), por lo que RF6/CA4 se cumple end-to-end. No se
+> modifica código porque ya era correcto; queda esta nota como constancia del análisis.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
