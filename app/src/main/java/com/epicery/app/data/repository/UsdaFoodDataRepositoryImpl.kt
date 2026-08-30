@@ -3,18 +3,23 @@ package com.epicery.app.data.repository
 import com.epicery.app.BuildConfig
 import com.epicery.app.data.local.UsdaNutritionCacheDao
 import com.epicery.app.data.local.UsdaNutritionCacheEntity
+import com.epicery.app.data.remote.ApiErrorState
 import com.epicery.app.data.remote.UsdaFood
 import com.epicery.app.data.remote.UsdaFoodDataApi
+import com.epicery.app.data.remote.toApiFailureReason
 import com.epicery.app.domain.model.UsdaNutritionInfo
 import com.epicery.app.domain.repository.UsdaFoodDataRepository
 import com.epicery.app.util.Constants
-import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 
 /**
  * Cachea las respuestas de USDA FoodData Central en Room, indexadas por término de
  * búsqueda (RNF5): si la cache está vigente evita la llamada de red, y si la llamada
- * falla por falta de conexión devuelve la última respuesta cacheada en vez de fallar.
+ * falla — timeout, error del servidor, o el límite de 1000 req/hora de USDA (HTTP 429) —
+ * devuelve la última respuesta cacheada en vez de fallar. La llamada de red en sí ya
+ * reintenta errores transitorios (ver `RetryInterceptor`); este catch es la última línea
+ * de defensa para que un fallo de API nunca tire abajo la app.
  */
 class UsdaFoodDataRepositoryImpl @Inject constructor(
     private val api: UsdaFoodDataApi,
@@ -39,9 +44,13 @@ class UsdaFoodDataRepositoryImpl @Inject constructor(
             if (nutrition != null) {
                 cacheDao.upsert(nutrition.toCacheEntity(normalizedQuery))
             }
+            ApiErrorState.clear()
             nutrition
-        } catch (e: IOException) {
-            cached?.toNutritionInfo() ?: throw e
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            ApiErrorState.report(source = "USDA FoodData", reason = e.toApiFailureReason())
+            cached?.toNutritionInfo()
         }
     }
 }
