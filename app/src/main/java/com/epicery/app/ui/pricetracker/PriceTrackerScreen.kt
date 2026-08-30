@@ -37,10 +37,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.FoodItem
 import com.epicery.app.domain.model.PriceHistory
@@ -63,7 +65,7 @@ fun PriceTrackerScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("Price Tracker", style = MaterialTheme.typography.headlineSmall) })
+            TopAppBar(title = { Text(stringResource(R.string.price_tracker_title), style = MaterialTheme.typography.headlineSmall) })
         }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -107,8 +109,10 @@ private fun PriceTrackerContent(
         )
 
         when {
-            uiState.selectedFoodItem == null -> HintState("Seleccioná un producto para ver su histórico de precios")
-            !uiState.hasHistory -> HintState("Todavía no hay suficiente histórico de precios para ${uiState.selectedFoodItem.name}")
+            uiState.selectedFoodItem == null -> HintState(stringResource(R.string.price_tracker_hint_select_product))
+            !uiState.hasHistory -> HintState(
+                stringResource(R.string.price_tracker_hint_no_history, uiState.selectedFoodItem.name)
+            )
             else -> {
                 if (uiState.isPriceHigh) {
                     HighPriceAlert(
@@ -151,7 +155,7 @@ private fun ProductSelector(
             value = selectedFoodItem?.name.orEmpty(),
             onValueChange = {},
             readOnly = true,
-            label = { Text("Producto") },
+            label = { Text(stringResource(R.string.label_product)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -191,8 +195,11 @@ private fun HighPriceAlert(latestPrice: Double, averagePrice: Double, modifier: 
                 tint = MaterialTheme.colorScheme.onErrorContainer
             )
             Text(
-                text = "Precio alto: ${formatPrice(latestPrice)} supera el promedio histórico de " +
-                    formatPrice(averagePrice),
+                text = stringResource(
+                    R.string.price_tracker_high_price_alert,
+                    formatPrice(latestPrice),
+                    formatPrice(averagePrice)
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -222,14 +229,18 @@ private fun TrendSummary(
                     tint = trendColor(trend)
                 )
                 Text(
-                    text = "Tendencia: ${trendLabel(trend)}",
+                    text = stringResource(R.string.price_tracker_trend_label, trendLabel(trend)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = trendColor(trend)
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Último precio: ${formatPrice(latestPrice)} · Promedio: ${formatPrice(averagePrice)}",
+                text = stringResource(
+                    R.string.price_tracker_latest_avg,
+                    formatPrice(latestPrice),
+                    formatPrice(averagePrice)
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -255,11 +266,14 @@ private fun trendIcon(trend: PriceTrend) = when (trend) {
     PriceTrend.STABLE -> Icons.Default.TrendingFlat
 }
 
-private fun trendLabel(trend: PriceTrend): String = when (trend) {
-    PriceTrend.UP -> "Sube"
-    PriceTrend.DOWN -> "Baja"
-    PriceTrend.STABLE -> "Estable"
-}
+@Composable
+private fun trendLabel(trend: PriceTrend): String = stringResource(
+    when (trend) {
+        PriceTrend.UP -> R.string.trend_up
+        PriceTrend.DOWN -> R.string.trend_down
+        PriceTrend.STABLE -> R.string.trend_stable
+    }
+)
 
 @Composable
 private fun trendColor(trend: PriceTrend) = when (trend) {

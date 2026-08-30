@@ -21,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.ui.theme.EpiceryTheme
 import java.util.Locale
@@ -45,7 +47,7 @@ fun BudgetScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("Presupuesto", style = MaterialTheme.typography.headlineSmall) })
+            TopAppBar(title = { Text(stringResource(R.string.budget_title), style = MaterialTheme.typography.headlineSmall) })
         }
     ) { innerPadding ->
         if (uiState.isLoading) {
@@ -104,24 +106,26 @@ private fun MonthlyProjectionCard(
 ) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Proyección mensual", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.budget_monthly_projection_title), style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "${formatPrice(monthlyProjection)} estimados este mes, según el ritmo de gasto semanal",
+                text = stringResource(R.string.budget_monthly_projection_body, formatPrice(monthlyProjection)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 12.dp)
             )
             if (monthlyBudget > 0) {
                 Text(
-                    text = "Presupuesto mensual estimado: ${formatPrice(monthlyBudget)}",
+                    text = stringResource(R.string.budget_monthly_budget_estimate, formatPrice(monthlyBudget)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp)
                 )
                 if (isOverProjection) {
                     Text(
-                        text = "La proyección supera el presupuesto mensual por " +
-                            formatPrice(monthlyProjection - monthlyBudget),
+                        text = stringResource(
+                            R.string.budget_monthly_over,
+                            formatPrice(monthlyProjection - monthlyBudget)
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)

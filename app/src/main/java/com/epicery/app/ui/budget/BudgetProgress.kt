@@ -12,8 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.epicery.app.R
 import com.epicery.app.ui.theme.EpiceryTheme
 import java.util.Locale
 
@@ -30,7 +32,7 @@ fun BudgetProgress(
 ) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Gasto semanal", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.budget_weekly_spent_title), style = MaterialTheme.typography.titleMedium)
             val progress = if (weeklyBudget > 0) {
                 (weeklySpent / weeklyBudget).toFloat().coerceIn(0f, 1f)
             } else {
@@ -47,7 +49,7 @@ fun BudgetProgress(
                 color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "${formatPrice(weeklySpent)} de ${formatPrice(weeklyBudget)}",
+                text = stringResource(R.string.format_amount_of_amount, formatPrice(weeklySpent), formatPrice(weeklyBudget)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp)
@@ -56,9 +58,9 @@ fun BudgetProgress(
                 val remaining = weeklyBudget - weeklySpent
                 Text(
                     text = if (remaining >= 0) {
-                        "Restan ${formatPrice(remaining)} esta semana"
+                        stringResource(R.string.budget_remaining, formatPrice(remaining))
                     } else {
-                        "Superaste el presupuesto semanal por ${formatPrice(-remaining)}"
+                        stringResource(R.string.budget_over, formatPrice(-remaining))
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,

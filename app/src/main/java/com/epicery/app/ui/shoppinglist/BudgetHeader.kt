@@ -12,7 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.epicery.app.R
 
 /**
  * Total estimado de la lista vs. presupuesto semanal (CA1: "ver el total estimado"), fijo en la
@@ -29,7 +31,7 @@ fun BudgetHeader(
         tonalElevation = 2.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Total estimado", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.shopping_list_total_estimated_title), style = MaterialTheme.typography.titleMedium)
             val progress = if (weeklyBudget > 0) {
                 (totalEstimated / weeklyBudget).toFloat().coerceIn(0f, 1f)
             } else {
@@ -49,7 +51,7 @@ fun BudgetHeader(
                 }
             )
             Text(
-                text = "${formatPrice(totalEstimated)} de ${formatPrice(weeklyBudget)}",
+                text = stringResource(R.string.format_amount_of_amount, formatPrice(totalEstimated), formatPrice(weeklyBudget)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp)

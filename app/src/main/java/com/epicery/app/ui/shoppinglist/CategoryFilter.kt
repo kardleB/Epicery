@@ -10,8 +10,12 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
+import com.epicery.app.ui.common.foodGroupAccentColor
+import com.epicery.app.ui.common.foodGroupLabel
 
 /**
  * Fila de filtros por grupo alimenticio (CA1: "filtrar por categoría alimenticia"). `null`
@@ -32,7 +36,7 @@ fun CategoryFilter(
             FilterChip(
                 selected = selectedFoodGroup == null,
                 onClick = { onFoodGroupSelected(null) },
-                label = { Text("Todos") },
+                label = { Text(stringResource(R.string.filter_all)) },
                 shape = RoundedCornerShape(20.dp)
             )
         }
@@ -42,11 +46,11 @@ fun CategoryFilter(
                 onClick = {
                     onFoodGroupSelected(if (selectedFoodGroup == group) null else group)
                 },
-                label = { Text(displayName(group)) },
+                label = { Text(foodGroupLabel(group)) },
                 shape = RoundedCornerShape(20.dp),
                 colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = accentColor(group).copy(alpha = 0.2f),
-                    selectedLabelColor = accentColor(group)
+                    selectedContainerColor = foodGroupAccentColor(group).copy(alpha = 0.2f),
+                    selectedLabelColor = foodGroupAccentColor(group)
                 )
             )
         }

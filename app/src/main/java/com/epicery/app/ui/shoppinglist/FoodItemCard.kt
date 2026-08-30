@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.ui.common.foodGroupAccentColor
 
 /**
  * Fila de un [GroceryItem] dentro de la lista agrupada por [FoodGroup] (CA1: marcar/desmarcar
@@ -52,7 +53,7 @@ fun FoodItemCard(
                     modifier = Modifier
                         .size(10.dp)
                         .clip(CircleShape)
-                        .background(accentColor(foodGroup))
+                        .background(foodGroupAccentColor(foodGroup))
                 )
             }
             Column(modifier = Modifier.weight(1f)) {

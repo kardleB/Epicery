@@ -15,16 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
+import com.epicery.app.ui.common.foodGroupAccentColor
+import com.epicery.app.ui.common.foodGroupLabel
 import com.epicery.app.ui.theme.EpiceryTheme
-import com.epicery.app.ui.theme.FoodGroupDairy
-import com.epicery.app.ui.theme.FoodGroupFruits
-import com.epicery.app.ui.theme.FoodGroupGrains
-import com.epicery.app.ui.theme.FoodGroupProtein
-import com.epicery.app.ui.theme.FoodGroupVegetables
 import java.util.Locale
 
 /**
@@ -38,10 +36,10 @@ fun CategorySpendingChart(
 ) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Gasto por categoría", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.budget_spending_by_category_title), style = MaterialTheme.typography.titleMedium)
             if (spendingByCategory.isEmpty()) {
                 Text(
-                    text = "Todavía no marcaste ningún item como comprado",
+                    text = stringResource(R.string.budget_no_purchases),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp)
@@ -70,7 +68,7 @@ fun CategorySpendingChart(
 private fun CategoryBar(group: FoodGroup, amount: Double, fraction: Float, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = categoryLabel(group), style = MaterialTheme.typography.bodyMedium)
+            Text(text = foodGroupLabel(group), style = MaterialTheme.typography.bodyMedium)
             Text(text = formatPrice(amount), style = MaterialTheme.typography.bodyMedium)
         }
         Box(
@@ -79,33 +77,17 @@ private fun CategoryBar(group: FoodGroup, amount: Double, fraction: Float, modif
                 .padding(top = 4.dp)
                 .height(10.dp)
                 .clip(RoundedCornerShape(5.dp))
-                .background(categoryColor(group).copy(alpha = 0.2f))
+                .background(foodGroupAccentColor(group).copy(alpha = 0.2f))
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(fraction)
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .background(categoryColor(group))
+                    .background(foodGroupAccentColor(group))
             )
         }
     }
-}
-
-private fun categoryColor(group: FoodGroup): Color = when (group) {
-    FoodGroup.FRUITS -> FoodGroupFruits
-    FoodGroup.VEGETABLES -> FoodGroupVegetables
-    FoodGroup.GRAINS -> FoodGroupGrains
-    FoodGroup.PROTEIN -> FoodGroupProtein
-    FoodGroup.DAIRY -> FoodGroupDairy
-}
-
-private fun categoryLabel(group: FoodGroup): String = when (group) {
-    FoodGroup.FRUITS -> "Frutas"
-    FoodGroup.VEGETABLES -> "Vegetales"
-    FoodGroup.GRAINS -> "Granos"
-    FoodGroup.PROTEIN -> "Proteínas"
-    FoodGroup.DAIRY -> "Lácteos"
 }
 
 private fun formatPrice(amount: Double): String = "$${"%.2f".format(Locale.ROOT, amount)}"

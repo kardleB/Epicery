@@ -35,12 +35,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.ui.common.foodGroupAccentColor
+import com.epicery.app.ui.common.foodGroupLabel
 import com.epicery.app.ui.theme.EpiceryTheme
 
 /**
@@ -62,12 +66,12 @@ fun ShoppingListScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Lista de compras", style = MaterialTheme.typography.headlineSmall) }
+                title = { Text(stringResource(R.string.shopping_list_title), style = MaterialTheme.typography.headlineSmall) }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar item")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
             }
         }
     ) { innerPadding ->
@@ -139,7 +143,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Agregá tu primer producto",
+            text = stringResource(R.string.empty_add_first_item),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
@@ -163,9 +167,9 @@ private fun ShoppingListContent(
             if (groupItems.isNotEmpty()) {
                 item(key = "header_${group.name}") {
                     Text(
-                        text = displayName(group),
+                        text = foodGroupLabel(group),
                         style = MaterialTheme.typography.titleLarge,
-                        color = accentColor(group),
+                        color = foodGroupAccentColor(group),
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                     )
                 }
@@ -198,22 +202,22 @@ private fun AddItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Agregar item") },
+        title = { Text(stringResource(R.string.add_item)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(R.string.label_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
                     OutlinedTextField(
-                        value = displayName(selectedGroup),
+                        value = foodGroupLabel(selectedGroup),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Grupo alimenticio") },
+                        label = { Text(stringResource(R.string.label_food_group)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -222,7 +226,7 @@ private fun AddItemDialog(
                     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         FoodGroup.entries.forEach { group ->
                             DropdownMenuItem(
-                                text = { Text(displayName(group)) },
+                                text = { Text(foodGroupLabel(group)) },
                                 onClick = {
                                     selectedGroup = group
                                     expanded = false
@@ -234,7 +238,7 @@ private fun AddItemDialog(
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = { priceText = it },
-                    label = { Text("Precio estimado") },
+                    label = { Text(stringResource(R.string.label_estimated_price)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -245,12 +249,12 @@ private fun AddItemDialog(
                 enabled = isValid,
                 onClick = { onConfirm(name.trim(), selectedGroup, price ?: 0.0) }
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -268,24 +272,24 @@ private fun EditPriceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Editar precio de ${item.name}") },
+        title = { Text(stringResource(R.string.shopping_list_edit_price_title, item.name)) },
         text = {
             OutlinedTextField(
                 value = priceText,
                 onValueChange = { priceText = it },
-                label = { Text("Precio estimado") },
+                label = { Text(stringResource(R.string.label_estimated_price)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
         },
         confirmButton = {
             TextButton(enabled = isValid, onClick = { onConfirm(price ?: item.estimatedPrice) }) {
-                Text("Guardar")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

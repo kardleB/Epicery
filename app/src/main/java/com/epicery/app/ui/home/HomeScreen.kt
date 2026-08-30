@@ -49,20 +49,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.ui.common.foodGroupAccentColor
+import com.epicery.app.ui.common.foodGroupLabel
 import com.epicery.app.ui.theme.EpiceryTheme
-import com.epicery.app.ui.theme.FoodGroupDairy
-import com.epicery.app.ui.theme.FoodGroupFruits
-import com.epicery.app.ui.theme.FoodGroupGrains
-import com.epicery.app.ui.theme.FoodGroupProtein
-import com.epicery.app.ui.theme.FoodGroupVegetables
 import java.util.Locale
 
 /**
@@ -85,17 +83,17 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Epicery", style = MaterialTheme.typography.headlineSmall) },
+                title = { Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall) },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ajustes")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showQuickAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar item")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_item))
             }
         }
     ) { innerPadding ->
@@ -144,13 +142,13 @@ private fun EmptyState(paddingValues: PaddingValues, onCreateListClick: () -> Un
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Todavía no tenés una lista de compras",
+            text = stringResource(R.string.home_empty_title),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onCreateListClick) {
-            Text("Crear tu primera lista de compras")
+            Text(stringResource(R.string.home_empty_cta))
         }
     }
 }
@@ -190,7 +188,7 @@ private fun HomeContent(
 private fun WeeklyBudgetCard(amountSpent: Double, weeklyBudget: Double, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Presupuesto semanal", style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.home_weekly_budget_title), style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
             val progress = if (weeklyBudget > 0) (amountSpent / weeklyBudget).toFloat().coerceIn(0f, 1f) else 0f
             LinearProgressIndicator(
@@ -207,7 +205,7 @@ private fun WeeklyBudgetCard(amountSpent: Double, weeklyBudget: Double, modifier
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${formatPrice(amountSpent)} de ${formatPrice(weeklyBudget)} usados",
+                text = stringResource(R.string.home_weekly_budget_used, formatPrice(amountSpent), formatPrice(weeklyBudget)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -227,15 +225,15 @@ private fun ShoppingListPreviewSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Tu lista de compras", style = MaterialTheme.typography.titleLarge)
+            Text(text = stringResource(R.string.home_shopping_list_title), style = MaterialTheme.typography.titleLarge)
             TextButton(onClick = onSeeAllClick) {
-                Text("Ver todo")
+                Text(stringResource(R.string.action_see_all))
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
         if (items.isEmpty()) {
             Text(
-                text = "Agregá tu primer producto",
+                text = stringResource(R.string.empty_add_first_item),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -262,7 +260,7 @@ private fun GroceryItemRow(item: GroceryItem, modifier: Modifier = Modifier) {
                     .size(12.dp)
                     .clip(CircleShape)
                     .background(
-                        foodGroupOrNull(item.foodGroup)?.let { accentColor(it) }
+                        foodGroupOrNull(item.foodGroup)?.let { foodGroupAccentColor(it) }
                             ?: MaterialTheme.colorScheme.outline
                     )
             )
@@ -281,7 +279,7 @@ private fun GroceryItemRow(item: GroceryItem, modifier: Modifier = Modifier) {
 @Composable
 private fun FoodGroupsSection(counts: Map<FoodGroup, Int>, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(text = "Grupos alimenticios", style = MaterialTheme.typography.titleLarge)
+        Text(text = stringResource(R.string.home_food_groups_title), style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         FoodGroupChipsGrid(counts)
     }
@@ -295,10 +293,10 @@ private fun FoodGroupChipsGrid(counts: Map<FoodGroup, Int>) {
                 rowGroups.forEach { group ->
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("${displayName(group)} (${counts[group] ?: 0})") },
+                        label = { Text("${foodGroupLabel(group)} (${counts[group] ?: 0})") },
                         colors = SuggestionChipDefaults.suggestionChipColors(
-                            containerColor = accentColor(group).copy(alpha = 0.15f),
-                            labelColor = accentColor(group)
+                            containerColor = foodGroupAccentColor(group).copy(alpha = 0.15f),
+                            labelColor = foodGroupAccentColor(group)
                         ),
                         shape = RoundedCornerShape(20.dp)
                     )
@@ -324,22 +322,22 @@ private fun QuickAddItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Agregar item") },
+        title = { Text(stringResource(R.string.add_item)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre") },
+                    label = { Text(stringResource(R.string.label_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
                     OutlinedTextField(
-                        value = displayName(selectedGroup),
+                        value = foodGroupLabel(selectedGroup),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Grupo alimenticio") },
+                        label = { Text(stringResource(R.string.label_food_group)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -351,7 +349,7 @@ private fun QuickAddItemDialog(
                     ) {
                         FoodGroup.entries.forEach { group ->
                             DropdownMenuItem(
-                                text = { Text(displayName(group)) },
+                                text = { Text(foodGroupLabel(group)) },
                                 onClick = {
                                     selectedGroup = group
                                     expanded = false
@@ -363,7 +361,7 @@ private fun QuickAddItemDialog(
                 OutlinedTextField(
                     value = priceText,
                     onValueChange = { priceText = it },
-                    label = { Text("Precio estimado") },
+                    label = { Text(stringResource(R.string.label_estimated_price)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -374,12 +372,12 @@ private fun QuickAddItemDialog(
                 enabled = isValid,
                 onClick = { onConfirm(name.trim(), selectedGroup, price ?: 0.0) }
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -387,22 +385,6 @@ private fun QuickAddItemDialog(
 
 private fun foodGroupOrNull(value: String): FoodGroup? =
     runCatching { FoodGroup.valueOf(value.uppercase(Locale.ROOT)) }.getOrNull()
-
-private fun accentColor(group: FoodGroup): Color = when (group) {
-    FoodGroup.FRUITS -> FoodGroupFruits
-    FoodGroup.VEGETABLES -> FoodGroupVegetables
-    FoodGroup.GRAINS -> FoodGroupGrains
-    FoodGroup.PROTEIN -> FoodGroupProtein
-    FoodGroup.DAIRY -> FoodGroupDairy
-}
-
-private fun displayName(group: FoodGroup): String = when (group) {
-    FoodGroup.FRUITS -> "Frutas"
-    FoodGroup.VEGETABLES -> "Vegetales"
-    FoodGroup.GRAINS -> "Granos"
-    FoodGroup.PROTEIN -> "Proteínas"
-    FoodGroup.DAIRY -> "Lácteos"
-}
 
 private fun formatPrice(amount: Double): String = "$${"%.2f".format(Locale.ROOT, amount)}"
 

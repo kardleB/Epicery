@@ -31,10 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.epicery.app.R
 import com.epicery.app.domain.model.AppLanguage
 import com.epicery.app.ui.theme.EpiceryTheme
 
@@ -55,7 +57,7 @@ fun SettingsScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(title = { Text("Ajustes", style = MaterialTheme.typography.headlineSmall) })
+            TopAppBar(title = { Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall) })
         }
     ) { innerPadding ->
         SettingsContent(
@@ -90,7 +92,7 @@ private fun SettingsContent(
     ) {
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(text = "Preferencias", style = MaterialTheme.typography.titleMedium)
+                Text(text = stringResource(R.string.settings_section_preferences), style = MaterialTheme.typography.titleMedium)
 
                 LanguageDropdown(
                     selectedLanguage = uiState.language,
@@ -117,9 +119,9 @@ private fun SettingsContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.padding(end = 12.dp)) {
-                    Text(text = "Usar la app sin cuenta", style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(R.string.settings_use_without_account_title), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = "Los datos se guardan solo en este dispositivo, sin sincronizar con la nube",
+                        text = stringResource(R.string.settings_use_without_account_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -146,7 +148,7 @@ private fun LanguageDropdown(
             value = selectedLanguage.displayName,
             onValueChange = {},
             readOnly = true,
-            label = { Text("Idioma") },
+            label = { Text(stringResource(R.string.settings_label_language)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,10 +181,10 @@ private fun FavoriteSupermarketDropdown(
 
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(
-            value = selectedSupermarket.ifBlank { "Sin definir" },
+            value = selectedSupermarket.ifBlank { stringResource(R.string.settings_supermarket_undefined) },
             onValueChange = {},
             readOnly = true,
-            label = { Text("Supermercado favorito") },
+            label = { Text(stringResource(R.string.settings_label_favorite_supermarket)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -220,7 +222,7 @@ private fun DefaultWeeklyBudgetField(
         OutlinedTextField(
             value = budgetText,
             onValueChange = { budgetText = it },
-            label = { Text("Presupuesto semanal por defecto") },
+            label = { Text(stringResource(R.string.settings_label_default_weekly_budget)) },
             singleLine = true,
             isError = budgetText.isNotBlank() && !isValid,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -231,7 +233,7 @@ private fun DefaultWeeklyBudgetField(
                 enabled = isValid && parsedBudget != defaultWeeklyBudget,
                 onClick = { parsedBudget?.let(onDefaultWeeklyBudgetChanged) }
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.action_save))
             }
         }
     }

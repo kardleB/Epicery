@@ -11,6 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -77,11 +78,12 @@ private fun EpiceryBottomBar(navController: NavHostController) {
     NavigationBar {
         EpiceryDestination.bottomNavItems.forEach { destination ->
             val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
+            val label = stringResource(destination.labelRes)
             NavigationBarItem(
                 selected = selected,
                 onClick = { navController.navigateToBottomNavDestination(destination) },
-                icon = { Icon(destination.icon, contentDescription = destination.label) },
-                label = { Text(destination.label, style = MaterialTheme.typography.labelSmall) }
+                icon = { Icon(destination.icon, contentDescription = label) },
+                label = { Text(label, style = MaterialTheme.typography.labelSmall) }
             )
         }
     }
