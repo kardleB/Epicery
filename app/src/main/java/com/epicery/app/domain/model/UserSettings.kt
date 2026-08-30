@@ -6,7 +6,7 @@ package com.epicery.app.domain.model
  * entre sesiones sin requerir una cuenta (RNF4).
  */
 data class UserSettings(
-    val language: AppLanguage = AppLanguage.SPANISH,
+    val language: AppLanguage = AppLanguage.FRENCH,
     val favoriteSupermarket: String = "",
     val defaultWeeklyBudget: Double = 0.0,
     val useAppWithoutAccount: Boolean = true

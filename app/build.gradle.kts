@@ -81,6 +81,9 @@ ksp {
 
 dependencies {
     implementation(libs.androidx.core.ktx)
+    // AppCompatDelegate.setApplicationLocales (RF6, CA4): override de idioma por app persistido
+    // en Settings, sin necesidad de que las Activities extiendan AppCompatActivity.
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)

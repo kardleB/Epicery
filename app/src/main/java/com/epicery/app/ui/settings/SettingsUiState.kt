@@ -10,7 +10,7 @@ import com.epicery.app.domain.model.AppLanguage
  */
 data class SettingsUiState(
     val isLoading: Boolean = true,
-    val language: AppLanguage = AppLanguage.SPANISH,
+    val language: AppLanguage = AppLanguage.FRENCH,
     val favoriteSupermarket: String = "",
     val defaultWeeklyBudget: Double = 0.0,
     val useAppWithoutAccount: Boolean = true

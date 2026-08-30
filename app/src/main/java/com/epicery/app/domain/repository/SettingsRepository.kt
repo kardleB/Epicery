@@ -12,6 +12,14 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsRepository {
     val userSettings: Flow<UserSettings>
 
+    /**
+     * Codigo de idioma (RF6) tal como fue persistido, o `null` si el usuario nunca lo cambio
+     * explicitamente desde Settings. Se usa para aplicar el override de idioma de la app
+     * (`AppCompatDelegate.setApplicationLocales` en `EpiceryApplication`) sin pisar el idioma
+     * del dispositivo (CA4) hasta que el usuario elija uno.
+     */
+    val storedLanguageCode: Flow<String?>
+
     suspend fun setLanguage(language: AppLanguage)
     suspend fun setFavoriteSupermarket(supermarket: String)
     suspend fun setDefaultWeeklyBudget(amount: Double)

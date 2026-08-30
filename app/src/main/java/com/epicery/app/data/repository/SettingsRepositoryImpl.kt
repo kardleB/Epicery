@@ -26,6 +26,8 @@ class SettingsRepositoryImpl @Inject constructor(
         )
     }
 
+    override val storedLanguageCode: Flow<String?> = dataStore.data.map { it[LANGUAGE_KEY] }
+
     override suspend fun setLanguage(language: AppLanguage) {
         dataStore.edit { it[LANGUAGE_KEY] = language.code }
     }
