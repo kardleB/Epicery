@@ -4,6 +4,7 @@ import com.epicery.app.domain.model.BudgetTrend
 import com.epicery.app.domain.model.GroceryItem
 import com.epicery.app.domain.model.ShoppingList
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
@@ -101,5 +102,53 @@ class BudgetCalculatorTest {
         assertEquals(emptyMap<String, Double>(), estimate.byCategory)
         assertEquals(0.0, estimate.monthlyProjection, 0.0001)
         assertEquals(BudgetTrend.STABLE, estimate.trend)
+    }
+
+    @Test
+    fun `generates a price alert when current price is more than 15 percent above the historical average`() {
+        val alert = calculator.alertIfOverAverage(
+            itemName = "Manzana",
+            currentPrice = 4.60,
+            historicalPrices = listOf(3.50, 4.00, 4.00)
+        )
+
+        requireNotNull(alert)
+        assertEquals("Manzana", alert.itemName)
+        assertEquals(4.60, alert.currentPrice, 0.0001)
+        assertEquals(3.8333, alert.averagePrice, 0.0001)
+        assertEquals(0.2, alert.increaseRatio, 0.001)
+    }
+
+    @Test
+    fun `does not generate a price alert when the increase is 15 percent or less`() {
+        val alert = calculator.alertIfOverAverage(
+            itemName = "Manzana",
+            currentPrice = 4.60,
+            historicalPrices = listOf(4.00, 4.00, 4.00)
+        )
+
+        assertNull(alert)
+    }
+
+    @Test
+    fun `does not generate a price alert when there is no price history`() {
+        val alert = calculator.alertIfOverAverage(
+            itemName = "Manzana",
+            currentPrice = 4.60,
+            historicalPrices = emptyList()
+        )
+
+        assertNull(alert)
+    }
+
+    @Test
+    fun `does not generate a price alert when the historical average is zero`() {
+        val alert = calculator.alertIfOverAverage(
+            itemName = "Manzana",
+            currentPrice = 4.60,
+            historicalPrices = listOf(0.0, 0.0)
+        )
+
+        assertNull(alert)
     }
 }
