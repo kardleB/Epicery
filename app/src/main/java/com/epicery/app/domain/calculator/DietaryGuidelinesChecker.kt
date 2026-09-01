@@ -42,6 +42,9 @@ class DietaryGuidelinesChecker {
             if (reasons.isEmpty()) null else FlaggedFoodItem(item.name, reasons)
         }
 
+        // Limite de sodio (<2300 mg/dia): se compara la suma de sodio de toda la lista contra
+        // DAILY_SODIUM_LIMIT_MG, ya que ese limite es diario y no tiene sentido aplicarlo a un
+        // unico item; el exceso de sodio por item se marca por separado con HIGH_SODIUM_PER_ITEM_MG.
         val totalSodiumMg = items.sumOf { it.sodiumMg }
 
         return DietaryGuidelinesReport(

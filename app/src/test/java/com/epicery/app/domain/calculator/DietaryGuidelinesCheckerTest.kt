@@ -118,6 +118,51 @@ class DietaryGuidelinesCheckerTest {
     }
 
     @Test
+    fun `flags an item that is highly processed and has excess sodium but not excess sugar`() {
+        val items = listOf(
+            foodItem("Sopa instantanea", FoodGroup.VEGETABLES, sodiumMg = 500.0, isProcessed = true)
+        )
+
+        val report = checker.evaluate(items)
+
+        val flagged = report.flaggedItems.single()
+        assertEquals(
+            setOf(DietaryFlagReason.HIGHLY_PROCESSED, DietaryFlagReason.EXCESS_SODIUM),
+            flagged.reasons.toSet()
+        )
+    }
+
+    @Test
+    fun `flags an item that is highly processed and has excess added sugar but not excess sodium`() {
+        val items = listOf(
+            foodItem("Galletas dulces", FoodGroup.GRAINS, addedSugarGrams = 15.0, isProcessed = true)
+        )
+
+        val report = checker.evaluate(items)
+
+        val flagged = report.flaggedItems.single()
+        assertEquals(
+            setOf(DietaryFlagReason.HIGHLY_PROCESSED, DietaryFlagReason.EXCESS_ADDED_SUGAR),
+            flagged.reasons.toSet()
+        )
+    }
+
+    @Test
+    fun `flags an item with excess sodium and excess added sugar but not highly processed`() {
+        val items = listOf(
+            foodItem("Salsa dulce casera", FoodGroup.VEGETABLES, sodiumMg = 500.0, addedSugarGrams = 15.0)
+        )
+
+        val report = checker.evaluate(items)
+
+        val flagged = report.flaggedItems.single()
+        assertEquals(
+            setOf(DietaryFlagReason.EXCESS_SODIUM, DietaryFlagReason.EXCESS_ADDED_SUGAR),
+            flagged.reasons.toSet()
+        )
+    }
+
+    @Test
     fun `sums the sodium of all items and flags when it exceeds the daily limit`() {
         val items = listOf(
             foodItem("Item 1", FoodGroup.PROTEIN, sodiumMg = 1200.0),
