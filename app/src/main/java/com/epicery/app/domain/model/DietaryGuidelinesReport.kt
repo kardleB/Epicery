@@ -16,11 +16,18 @@ data class DietaryGuidelinesReport(
         get() = missingFoodGroups.isEmpty() && flaggedItems.isEmpty() && !exceedsDailySodiumLimit
 }
 
-/** Grupo alimenticio con menos porciones en la lista que las recomendadas semanalmente. */
+/**
+ * Grupo alimenticio con menos porciones en la lista que las recomendadas semanalmente.
+ *
+ * [suggestedItems] son alimentos del catalogo (no incluidos ya en la lista de compras) que
+ * ayudarian a cubrir el faltante de este grupo; queda vacio si no se le paso un catalogo a
+ * [com.epicery.app.domain.calculator.DietaryGuidelinesChecker.evaluate].
+ */
 data class MissingFoodGroup(
     val foodGroup: FoodGroup,
     val presentServings: Int,
-    val recommendedServings: Int
+    val recommendedServings: Int,
+    val suggestedItems: List<FoodItem> = emptyList()
 ) {
     val missingServings: Int
         get() = (recommendedServings - presentServings).coerceAtLeast(0)

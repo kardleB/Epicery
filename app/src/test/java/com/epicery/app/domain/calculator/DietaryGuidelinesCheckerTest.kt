@@ -185,6 +185,84 @@ class DietaryGuidelinesCheckerTest {
     }
 
     @Test
+    fun `does not suggest items for a missing food group when no catalog is provided`() {
+        val items = listOf(foodItem("Manzana", FoodGroup.FRUITS))
+
+        val report = checker.evaluate(items)
+
+        val missingFruits = report.missingFoodGroups.first { it.foodGroup == FoodGroup.FRUITS }
+        assertTrue(missingFruits.suggestedItems.isEmpty())
+    }
+
+    @Test
+    fun `suggests catalog items belonging to a missing food group`() {
+        val items = listOf(foodItem("Manzana", FoodGroup.FRUITS))
+        val catalog = listOf(
+            foodItem("Banana", FoodGroup.FRUITS),
+            foodItem("Pollo", FoodGroup.PROTEIN)
+        )
+
+        val report = checker.evaluate(items, catalog)
+
+        val missingFruits = report.missingFoodGroups.first { it.foodGroup == FoodGroup.FRUITS }
+        assertEquals(listOf("Banana"), missingFruits.suggestedItems.map { it.name })
+    }
+
+    @Test
+    fun `does not suggest an item that is already in the shopping list`() {
+        val items = listOf(foodItem("Manzana", FoodGroup.FRUITS))
+        val catalog = listOf(foodItem("Manzana", FoodGroup.FRUITS), foodItem("Banana", FoodGroup.FRUITS))
+
+        val report = checker.evaluate(items, catalog)
+
+        val missingFruits = report.missingFoodGroups.first { it.foodGroup == FoodGroup.FRUITS }
+        assertEquals(listOf("Banana"), missingFruits.suggestedItems.map { it.name })
+    }
+
+    @Test
+    fun `prefers unprocessed and lower sodium or added sugar items when suggesting`() {
+        val items = listOf<FoodItem>()
+        val catalog = listOf(
+            foodItem("Papas fritas", FoodGroup.VEGETABLES, isProcessed = true),
+            foodItem("Sopa enlatada", FoodGroup.VEGETABLES, sodiumMg = 500.0),
+            foodItem("Zanahoria", FoodGroup.VEGETABLES)
+        )
+
+        val report = checker.evaluate(items, catalog)
+
+        val missingVegetables = report.missingFoodGroups.first { it.foodGroup == FoodGroup.VEGETABLES }
+        assertEquals(
+            listOf("Zanahoria", "Sopa enlatada", "Papas fritas"),
+            missingVegetables.suggestedItems.map { it.name }
+        )
+    }
+
+    @Test
+    fun `caps suggestions at the maximum per group even if more servings are missing`() {
+        val items = listOf<FoodItem>()
+        val catalog = (1..DietaryGuidelinesChecker.MAX_SUGGESTIONS_PER_GROUP + 2)
+            .map { foodItem("Fruta catalogo $it", FoodGroup.FRUITS) }
+
+        val report = checker.evaluate(items, catalog)
+
+        val missingFruits = report.missingFoodGroups.first { it.foodGroup == FoodGroup.FRUITS }
+        assertEquals(DietaryGuidelinesChecker.MAX_SUGGESTIONS_PER_GROUP, missingFruits.suggestedItems.size)
+    }
+
+    @Test
+    fun `does not suggest more items than the missing servings for a group`() {
+        val recommended = DietaryGuidelinesChecker.RECOMMENDED_WEEKLY_SERVINGS.getValue(FoodGroup.FRUITS)
+        val items = (1 until recommended).map { foodItem("Fruta $it", FoodGroup.FRUITS) }
+        val catalog = listOf(foodItem("Banana", FoodGroup.FRUITS), foodItem("Kiwi", FoodGroup.FRUITS))
+
+        val report = checker.evaluate(items, catalog)
+
+        val missingFruits = report.missingFoodGroups.first { it.foodGroup == FoodGroup.FRUITS }
+        assertEquals(1, missingFruits.missingServings)
+        assertEquals(1, missingFruits.suggestedItems.size)
+    }
+
+    @Test
     fun `is compliant only when there are no missing food groups, no flagged items and sodium is within limit`() {
         val items = DietaryGuidelinesChecker.RECOMMENDED_WEEKLY_SERVINGS.flatMap { (foodGroup, recommended) ->
             (1..recommended).map { foodItem("$foodGroup $it", foodGroup, sodiumMg = 10.0) }

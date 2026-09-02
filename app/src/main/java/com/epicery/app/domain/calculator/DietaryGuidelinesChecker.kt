@@ -22,12 +22,23 @@ class DietaryGuidelinesChecker {
      * Evalua [items] (los alimentos de una lista de compras) y devuelve un [DietaryGuidelinesReport]
      * indicando que grupos alimenticios tienen menos porciones que las recomendadas y que items
      * fueron marcados por ser altamente procesados o tener exceso de sodio o azucares anadidos.
+     *
+     * Si se provee [catalog] (por ejemplo, todo el catalogo de alimentos disponible), cada grupo
+     * alimenticio faltante incluye ademas hasta [MAX_SUGGESTIONS_PER_GROUP] sugerencias de
+     * [FoodItem] de ese grupo para completar la lista de compras, priorizando alimentos no
+     * procesados y con menos sodio/azucares anadidos. Sin catalogo, las sugerencias quedan vacias.
      */
-    fun evaluate(items: List<FoodItem>): DietaryGuidelinesReport {
+    fun evaluate(items: List<FoodItem>, catalog: List<FoodItem> = emptyList()): DietaryGuidelinesReport {
         val missingFoodGroups = RECOMMENDED_WEEKLY_SERVINGS.mapNotNull { (foodGroup, recommendedServings) ->
             val presentServings = items.count { it.foodGroup == foodGroup }
             if (presentServings < recommendedServings) {
-                MissingFoodGroup(foodGroup, presentServings, recommendedServings)
+                val missingServings = recommendedServings - presentServings
+                MissingFoodGroup(
+                    foodGroup = foodGroup,
+                    presentServings = presentServings,
+                    recommendedServings = recommendedServings,
+                    suggestedItems = suggestItemsForGroup(foodGroup, missingServings, items, catalog)
+                )
             } else {
                 null
             }
@@ -55,6 +66,26 @@ class DietaryGuidelinesChecker {
         )
     }
 
+    /**
+     * Sugiere hasta [MAX_SUGGESTIONS_PER_GROUP] alimentos de [catalog] que pertenecen a
+     * [foodGroup] para cubrir [missingServings], excluyendo los que ya estan en la lista de
+     * compras ([itemsInList]) y priorizando los no procesados con menos sodio/azucares anadidos.
+     */
+    private fun suggestItemsForGroup(
+        foodGroup: FoodGroup,
+        missingServings: Int,
+        itemsInList: List<FoodItem>,
+        catalog: List<FoodItem>
+    ): List<FoodItem> {
+        val namesInList = itemsInList.mapTo(mutableSetOf()) { it.name }
+        return catalog
+            .asSequence()
+            .filter { it.foodGroup == foodGroup && it.name !in namesInList }
+            .sortedWith(compareBy({ it.isProcessed }, { it.sodiumMg }, { it.addedSugarGrams }))
+            .take(minOf(missingServings, MAX_SUGGESTIONS_PER_GROUP))
+            .toList()
+    }
+
     companion object {
         /** Limite diario de sodio recomendado por las Dietary Guidelines 2025-2030. */
         const val DAILY_SODIUM_LIMIT_MG = 2300.0
@@ -68,6 +99,9 @@ class DietaryGuidelinesChecker {
          * como "alto en sodio" por porcion.
          */
         const val HIGH_SODIUM_PER_ITEM_MG = DAILY_SODIUM_LIMIT_MG * 0.2
+
+        /** Cantidad maxima de sugerencias de items que se devuelven por grupo alimenticio faltante. */
+        const val MAX_SUGGESTIONS_PER_GROUP = 3
 
         /**
          * Porciones semanales recomendadas por grupo alimenticio: adaptacion a un conteo de items
