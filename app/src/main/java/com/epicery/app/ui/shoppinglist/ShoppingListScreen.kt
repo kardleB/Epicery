@@ -1,5 +1,6 @@
 package com.epicery.app.ui.shoppinglist
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -20,6 +22,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -35,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,12 +65,31 @@ fun ShoppingListScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<GroceryItem?>(null) }
+    val context = LocalContext.current
+    val groupLabels = FoodGroup.entries.associateWith { foodGroupLabel(it) }
+    val totalLabel = stringResource(R.string.shopping_list_total_estimated_title)
+    val shareChooserTitle = stringResource(R.string.shopping_list_share_chooser_title)
+    val shareActionLabel = stringResource(R.string.shopping_list_share_action)
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.shopping_list_title), style = MaterialTheme.typography.headlineSmall) }
+                title = { Text(stringResource(R.string.shopping_list_title), style = MaterialTheme.typography.headlineSmall) },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            val shareText = formatShoppingListForSharing(uiState.allItems, groupLabels, totalLabel)
+                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, shareChooserTitle))
+                        }
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = shareActionLabel)
+                    }
+                }
             )
         },
         floatingActionButton = {

@@ -55,6 +55,8 @@
     <string name="shopping_list_title">Lista de compras</string>
     <string name="shopping_list_total_estimated_title">Total estimado</string>
     <string name="shopping_list_edit_price_title">Editar precio de %1$s</string>
+    <string name="shopping_list_share_action">Compartir lista</string>
+    <string name="shopping_list_share_chooser_title">Compartir lista de compras</string>
 
     <string name="settings_title">Ajustes</string>
     <string name="settings_section_preferences">Preferencias</string>
