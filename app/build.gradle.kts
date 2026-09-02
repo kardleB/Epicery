@@ -121,6 +121,10 @@ dependencies {
     implementation(libs.firebase.firestore)
 
     testImplementation(libs.junit)
+    // MockWebServer (RF1, RF3, CA1, CA4): sirve respuestas HTTP falsas de USDA FoodData/GroceryPulse
+    // en tests de integración locales, sin llamar a las APIs reales en cada corrida de CI.
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
