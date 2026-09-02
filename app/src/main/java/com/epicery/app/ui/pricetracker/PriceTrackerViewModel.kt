@@ -2,7 +2,9 @@ package com.epicery.app.ui.pricetracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.epicery.app.domain.calculator.BudgetCalculator
 import com.epicery.app.domain.model.FoodItem
+import com.epicery.app.domain.model.PriceAlert
 import com.epicery.app.domain.model.PriceHistory
 import com.epicery.app.domain.repository.FoodRepository
 import com.epicery.app.domain.repository.PriceRepository
@@ -23,6 +25,8 @@ class PriceTrackerViewModel @Inject constructor(
     foodRepository: FoodRepository,
     priceRepository: PriceRepository
 ) : ViewModel() {
+
+    private val budgetCalculator = BudgetCalculator()
 
     private val selectedFoodItemId = MutableStateFlow<Long?>(null)
 
@@ -66,8 +70,18 @@ class PriceTrackerViewModel @Inject constructor(
             priceHistory = chronologicalHistory,
             averagePrice = averagePrice,
             latestPrice = chronologicalHistory.lastOrNull()?.price,
-            trend = computeTrend(chronologicalHistory)
+            trend = computeTrend(chronologicalHistory),
+            priceAlert = selectedFoodItem?.let { foodItem -> computePriceAlert(foodItem.name, chronologicalHistory) }
         )
+    }
+
+    /** Compara el ultimo precio registrado contra el promedio de los anteriores usando
+     * [BudgetCalculator.alertIfOverAverage] para disparar la alerta de precio alto (RF3, CA2). */
+    private fun computePriceAlert(itemName: String, chronologicalHistory: List<PriceHistory>): PriceAlert? {
+        if (chronologicalHistory.size < 2) return null
+        val latestPrice = chronologicalHistory.last().price
+        val previousPrices = chronologicalHistory.dropLast(1).map { it.price }
+        return budgetCalculator.alertIfOverAverage(itemName, latestPrice, previousPrices)
     }
 
     /** Compara el último precio contra el promedio de los registros anteriores; una banda de

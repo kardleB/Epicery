@@ -20,7 +20,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.FoodItem
+import com.epicery.app.domain.model.PriceAlert
 import com.epicery.app.domain.model.PriceHistory
 import com.epicery.app.ui.theme.EpiceryTheme
 import java.util.Locale
@@ -114,10 +114,10 @@ private fun PriceTrackerContent(
                 stringResource(R.string.price_tracker_hint_no_history, uiState.selectedFoodItem.name)
             )
             else -> {
-                if (uiState.isPriceHigh) {
+                uiState.priceAlert?.let { alert ->
                     HighPriceAlert(
-                        latestPrice = uiState.latestPrice ?: 0.0,
-                        averagePrice = uiState.averagePrice
+                        latestPrice = alert.currentPrice,
+                        averagePrice = alert.averagePrice
                     )
                 }
                 TrendSummary(
@@ -300,7 +300,8 @@ private fun PriceTrackerContentPreview() {
                 ),
                 averagePrice = 3.93,
                 latestPrice = 4.5,
-                trend = PriceTrend.UP
+                trend = PriceTrend.UP,
+                priceAlert = PriceAlert(itemName = "Manzanas", currentPrice = 4.5, averagePrice = 3.65, increaseRatio = 0.233)
             ),
             onFoodItemSelected = {}
         )

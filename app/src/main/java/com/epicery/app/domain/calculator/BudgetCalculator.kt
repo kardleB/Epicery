@@ -2,6 +2,7 @@ package com.epicery.app.domain.calculator
 
 import com.epicery.app.domain.model.BudgetEstimate
 import com.epicery.app.domain.model.BudgetTrend
+import com.epicery.app.domain.model.PriceAlert
 import com.epicery.app.domain.model.ShoppingList
 
 /**
@@ -31,6 +32,29 @@ class BudgetCalculator {
         )
     }
 
+    /**
+     * Genera una [PriceAlert] cuando [currentPrice] supera en mas del 15%
+     * ([PRICE_ALERT_THRESHOLD_RATIO]) el promedio de [historicalPrices] de un articulo (RF3, CA2).
+     * Devuelve `null` si no hay historico, si el promedio es cero o negativo, o si el incremento
+     * no supera el umbral.
+     */
+    fun alertIfOverAverage(itemName: String, currentPrice: Double, historicalPrices: List<Double>): PriceAlert? {
+        if (historicalPrices.isEmpty()) return null
+
+        val averagePrice = historicalPrices.average()
+        if (averagePrice <= 0.0) return null
+
+        val increaseRatio = (currentPrice - averagePrice) / averagePrice
+        if (increaseRatio <= PRICE_ALERT_THRESHOLD_RATIO) return null
+
+        return PriceAlert(
+            itemName = itemName,
+            currentPrice = currentPrice,
+            averagePrice = averagePrice,
+            increaseRatio = increaseRatio
+        )
+    }
+
     private fun calculateTrend(total: Double, previousWeeklyTotals: List<Double>): BudgetTrend {
         if (previousWeeklyTotals.isEmpty()) return BudgetTrend.STABLE
 
@@ -53,5 +77,8 @@ class BudgetCalculator {
 
         /** Diferencia minima (5%) contra el promedio anterior para considerar que hay tendencia. */
         private const val TREND_THRESHOLD_RATIO = 0.05
+
+        /** Incremento minimo (15%) sobre el promedio historico para disparar una [PriceAlert]. */
+        const val PRICE_ALERT_THRESHOLD_RATIO = 0.15
     }
 }

@@ -156,6 +156,24 @@ cacheados sin que la app falle.
 > con una búsqueda de `Text("...")` sobre `ui/`), por lo que RF6/CA4 se cumple end-to-end. No se
 > modifica código porque ya era correcto; queda esta nota como constancia del análisis.
 
+> **Nota sobre auditoría automática (pruebas de integración de USDAFoodDataApi/GroceryPulseApi):**
+> un auditor automático marcó NO CUMPLE por dos motivos que no resisten la lectura del commit
+> `b40abb1`: (1) señaló que `app/schemas/com.epicery.app.data.local/AppDatabase/4.json` "contradice
+> la descripción de la tarea" — ese archivo es el esquema exportado de Room del commit `fa9a640`,
+> completamente ajeno a esta tarea (que es sobre `UsdaFoodDataApi` y `GroceryPulseApi`, no sobre
+> `AppDatabase`); el auditor mezcló evidencia de un commit no relacionado. (2) afirmó que "falta"
+> `UsdaFoodDataApiIntegrationTest.kt` y `GroceryPulseApiIntegrationTest.kt`, pero ambos archivos
+> existen en `app/src/test/java/com/epicery/app/data/remote/` desde el commit `b40abb1` y sí
+> cumplen los tres escenarios pedidos: cada uno arma el stack real Retrofit + OkHttp +
+> `RetryInterceptor` contra un `MockWebServer` local (sin tocar `api.nal.usda.gov` ni
+> `api.apify.com`) y prueba (a) el mapeo de una respuesta exitosa, (b) una respuesta/dataset vacío,
+> (c) agotamiento de reintentos por rate limiting (429) con `HttpException`, (d) recuperación tras
+> un único 429, y (e) `SocketTimeoutException` cuando el servidor demora la respuesta. Las 10
+> pruebas (5 por API) corren y pasan en `testDebugUnitTest`
+> (`app/build/test-results/testDebugUnitTest/TEST-com.epicery.app.data.remote.*IntegrationTest.xml`,
+> `tests="5" failures="0" errors="0"` en ambos archivos). No se modifica código porque ya era
+> correcto; queda esta nota como constancia del análisis.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).

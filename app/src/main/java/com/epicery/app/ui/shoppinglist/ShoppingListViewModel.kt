@@ -88,7 +88,8 @@ class ShoppingListViewModel @Inject constructor(
             weeklyBudget = budget,
             totalEstimated = items.sumOf { it.estimatedPrice },
             selectedFoodGroup = selectedGroup,
-            itemsByGroup = itemsByGroup
+            itemsByGroup = itemsByGroup,
+            allItems = items
         )
     }
 
