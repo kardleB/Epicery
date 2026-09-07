@@ -174,6 +174,53 @@ cacheados sin que la app falle.
 > `tests="5" failures="0" errors="0"` en ambos archivos). No se modifica código porque ya era
 > correcto; queda esta nota como constancia del análisis.
 
+## Firma de release (signing) — solo para publicar en Play Store
+
+La app compila y corre en debug sin necesidad de nada de esto. El build type `release`
+(`app/build.gradle.kts`) solo queda firmado si están configurados los cuatro valores de abajo;
+si faltan, `release` sigue compilando pero sin firma (sirve para probar localmente, no para
+instalar en un dispositivo real ni subir a Play Store). Igual que las API keys, **ninguno de
+estos cuatro valores se versiona**.
+
+> **Importante:** a diferencia de las API keys (regenerables), el keystore de release es
+> irrecuperable — Play Store ata la app para siempre a la clave con la que se firmó la primera
+> versión publicada. Si se pierde el `.jks`/`.keystore` o su contraseña, no hay forma de subir
+> actualizaciones a esa misma ficha de Play Store nunca más. Generarlo es responsabilidad de
+> quien vaya a publicar, no de este repo ni de un agente automatizado.
+
+Pasos para configurarlo cuando el equipo esté listo para publicar:
+
+1. Generar un keystore con `keytool` (viene incluido en el JDK):
+
+   ```bash
+   keytool -genkeypair -v -keystore epicery-release.jks -alias epicery \
+     -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. Guardar `epicery-release.jks` **fuera del repo**, en un lugar seguro con backup (ej. un
+   gestor de contraseñas del equipo o un secret manager) — perderlo bloquea futuras
+   actualizaciones de la app en Play Store.
+3. Agregar estas cuatro líneas a `local.properties` (nunca se versiona, ya está en
+   `.gitignore` junto con `sdk.dir`):
+
+   ```properties
+   RELEASE_KEYSTORE_PATH=/ruta/absoluta/a/epicery-release.jks
+   RELEASE_KEYSTORE_PASSWORD=tu_contraseña_del_keystore
+   RELEASE_KEY_ALIAS=epicery
+   RELEASE_KEY_PASSWORD=tu_contraseña_de_la_clave
+   ```
+
+   Alternativamente, para builds de CI, se pueden definir como variables de entorno del mismo
+   nombre (por ejemplo, secrets de GitHub Actions) en vez de editar `local.properties`.
+4. Sincronizar Gradle y compilar `./gradlew assembleRelease` (o `bundleRelease` para subir a
+   Play Store): con los cuatro valores presentes, `hasReleaseSigningConfig` pasa a `true` y el
+   build type `release` queda firmado automáticamente.
+
+`app/proguard-rules.pro` ya trae las reglas necesarias para Gson (usado por Retrofit al
+deserializar las respuestas de USDA FoodData y GroceryPulse) para cuando se active
+`isMinifyEnabled = true`; hoy está en `false`, así que esas reglas todavía no se aplican a
+ningún build.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).

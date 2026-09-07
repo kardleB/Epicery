@@ -32,6 +32,23 @@ val apifyGroceryActorId: String =
         ?: System.getenv("APIFY_GROCERY_ACTOR_ID")
         ?: "")
 
+// Firma de release (ver README, sección "Firma de release"): igual que las API keys de arriba,
+// ninguno de estos cuatro valores se versiona. Sin ellos, el build type "release" queda sin
+// firmar (se puede compilar y probar localmente, pero no instalar ni publicar en Play Store).
+val releaseKeystorePath: String? =
+    localProperties.getProperty("RELEASE_KEYSTORE_PATH") ?: System.getenv("RELEASE_KEYSTORE_PATH")
+val releaseKeystorePassword: String? =
+    localProperties.getProperty("RELEASE_KEYSTORE_PASSWORD") ?: System.getenv("RELEASE_KEYSTORE_PASSWORD")
+val releaseKeyAlias: String? =
+    localProperties.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
+val releaseKeyPassword: String? =
+    localProperties.getProperty("RELEASE_KEY_PASSWORD") ?: System.getenv("RELEASE_KEY_PASSWORD")
+val hasReleaseSigningConfig: Boolean =
+    !releaseKeystorePath.isNullOrBlank() &&
+        !releaseKeystorePassword.isNullOrBlank() &&
+        !releaseKeyAlias.isNullOrBlank() &&
+        !releaseKeyPassword.isNullOrBlank()
+
 android {
     namespace = "com.epicery.app"
     compileSdk = 35
@@ -50,6 +67,17 @@ android {
         buildConfigField("String", "APIFY_GROCERY_ACTOR_ID", "\"$apifyGroceryActorId\"")
     }
 
+    signingConfigs {
+        if (hasReleaseSigningConfig) {
+            create("release") {
+                storeFile = file(releaseKeystorePath!!)
+                storePassword = releaseKeystorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -57,6 +85,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseSigningConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
