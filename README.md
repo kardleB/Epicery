@@ -70,25 +70,28 @@ en vez de hacer requests inválidos.
 
 ## Configuración de GroceryPulse / Apify (comparación de precios en Montreal)
 
-La app consume el actor de [Apify](https://apify.com) "Canadian Grocery Price Comparison" a
-través de `GroceryPulseApi` (en `data/remote`) para comparar precios de un artículo en
-supermercados de Montreal (RF3, RF5, CA4). `GetMontrealGroceryPricesUseCase` guarda cada
-cotización obtenida como un `PriceHistoryEntity`, integrándose con el tracking de precios y la
-estimación de presupuesto semanal existentes. Cada desarrollador/entorno necesita su propio
-token de Apify y el ID del actor al que esté suscripto; **ninguno de los dos se versiona**.
+La app consume el actor de [Apify](https://apify.com) **Flipp Scraper**
+(`chimerical_quicklime/flipp-scraper`) a través de `GroceryPulseApi` (en `data/remote`) para
+comparar precios de un artículo en comercios de Montreal a partir de un código postal (RF3,
+RF5, CA4). `GetMontrealGroceryPricesUseCase` guarda cada cotización obtenida como un
+`PriceHistoryEntity`, integrándose con el tracking de precios y la estimación de presupuesto
+semanal existentes. Cada desarrollador/entorno necesita su propio token de Apify; **no se
+versiona**.
 
 Pasos para configurarla:
 
 1. Crear una cuenta en <https://apify.com> (tiene plan gratuito) y suscribirse al actor
-   "Canadian Grocery Price Comparison" (o a un actor equivalente de comparación de precios de
-   supermercados canadienses).
+   [Flipp Scraper](https://apify.com/chimerical_quicklime/flipp-scraper) (o a un actor
+   equivalente de comparación de precios de supermercados canadienses — en ese caso, ajustar
+   `GroceryPulseRequest`/`GroceryPriceResponse` en `data/remote` a su esquema real, ver nota
+   abajo).
 2. Generar un token de API personal desde la consola de Apify.
 3. Agregar las siguientes líneas a `local.properties` (en la raíz del proyecto, ya está en
    `.gitignore` junto con `sdk.dir`):
 
    ```properties
    APIFY_API_TOKEN=tu_token_aqui
-   APIFY_GROCERY_ACTOR_ID=usuario~nombre-del-actor
+   APIFY_GROCERY_ACTOR_ID=chimerical_quicklime~flipp-scraper
    ```
 
    Alternativamente, para builds de CI, se pueden definir las variables de entorno
@@ -102,10 +105,18 @@ precio fallan con un error explícito en vez de hacer requests inválidos — es
 API no está disponible/configurada, la app simplemente no obtiene precios comparativos, sin
 romper el resto del flujo (CA4).
 
-> **Nota:** el esquema de input/output de `GroceryPulseApi` (`GroceryPulseRequest` /
-> `GroceryPriceResponse`) asume los nombres de campo más comunes entre actores de scraping de
-> Apify (`query`, `city`, `store`, `price`, etc). Si el actor concreto al que se suscriba el
-> equipo usa otros nombres de campo, ajustar esas dos data classes en `data/remote`.
+> **Importante sobre costos:** a diferencia de USDA (gratis), cada corrida de este actor en
+> Apify **cobra dinero real** de la cuenta configurada (plan pay-per-event: ~US$0.05 por
+> arranque + ~US$0.005 por item scrapeado). El plan gratuito de Apify da créditos mensuales,
+> pero se agotan — no es "gratis" en el sentido de las otras integraciones de este README.
+> Revisar el uso en <https://console.apify.com> antes de probar la app repetidamente.
+
+> **Nota sobre el esquema:** `GroceryPulseRequest` (`query`, `postalCode`, `maxItems`) y
+> `GroceryPriceResponse` (`merchant`, `name`, `price`, `originalPrice`, `postalCode`, `url`)
+> en `data/remote` ya están ajustados al esquema real de Flipp Scraper (verificado corriendo
+> el actor: busca por código postal, no por ciudad, y no siempre distingue moneda porque es
+> exclusivo de Canadá). Si el equipo cambia de actor, estos dos data class son lo primero que
+> hay que revisar.
 
 ## Caché offline-first de USDA FoodData y GroceryPulse (RNF5)
 

@@ -46,11 +46,9 @@ class GroceryPulseRepositoryImpl @Inject constructor(
             val response = api.compareGroceryPrices(
                 actorId = BuildConfig.APIFY_GROCERY_ACTOR_ID,
                 token = BuildConfig.APIFY_API_TOKEN,
-                request = GroceryPulseRequest(query = query, city = Constants.MONTREAL_CITY)
+                request = GroceryPulseRequest(query = query)
             )
-            val quotes = response
-                .filter { it.city.isNullOrBlank() || it.city.contains(Constants.MONTREAL_CITY, ignoreCase = true) }
-                .mapNotNull { it.toGroceryPriceQuoteOrNull() }
+            val quotes = response.mapNotNull { it.toGroceryPriceQuoteOrNull() }
             val fetchedAt = System.currentTimeMillis()
             cacheDao.replaceForQuery(normalizedQuery, quotes.map { it.toCacheEntity(normalizedQuery, fetchedAt) })
             ApiErrorState.clear()
@@ -85,14 +83,14 @@ private fun GroceryPriceQuote.toCacheEntity(normalizedQuery: String, fetchedAt: 
 )
 
 private fun GroceryPriceResponse.toGroceryPriceQuoteOrNull(): GroceryPriceQuote? {
-    val storeName = store?.takeIf { it.isNotBlank() } ?: return null
+    val storeName = merchant?.takeIf { it.isNotBlank() } ?: return null
     if (price <= 0.0) return null
     return GroceryPriceQuote(
         storeName = storeName,
-        productName = title.orEmpty(),
+        productName = name.orEmpty(),
         price = price,
-        currency = currency?.takeIf { it.isNotBlank() } ?: "CAD",
-        city = city?.takeIf { it.isNotBlank() } ?: Constants.MONTREAL_CITY,
+        currency = "CAD",
+        city = Constants.MONTREAL_CITY,
         sourceUrl = url
     )
 }

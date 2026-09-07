@@ -14,10 +14,13 @@ import org.junit.Test
 
 /**
  * Verifica que [GroceryPulseRepositoryImpl] nunca deja propagar una excepción cuando
- * GroceryPulse (Apify) no está disponible (en este entorno de test, `BuildConfig.APIFY_API_TOKEN`
- * está vacío porque no hay `local.properties` — el mismo `check()` que dispara un fallo real
- * de configuración/API en producción): en cambio degrada a la última cotización cacheada, o
- * a una lista vacía si tampoco hay cache, para que la app siga funcionando con datos locales.
+ * GroceryPulse (Apify) no está disponible: en cambio degrada a la última cotización
+ * cacheada, o a una lista vacía si tampoco hay cache, para que la app siga funcionando con
+ * datos locales. [UnreachableGroceryPulseApi] lanza [IllegalStateException] (el mismo tipo
+ * que dispara el `check()` real de `GroceryPulseRepositoryImpl` cuando faltan las
+ * credenciales) para simular la falla de forma determinística, sin depender de si
+ * `local.properties` tiene o no `APIFY_API_TOKEN`/`APIFY_GROCERY_ACTOR_ID` configurados en
+ * la máquina que corre el test.
  */
 class GroceryPulseRepositoryImplTest {
 
@@ -27,7 +30,7 @@ class GroceryPulseRepositoryImplTest {
             token: String,
             request: GroceryPulseRequest
         ): List<GroceryPriceResponse> {
-            throw AssertionError("no debería llamarse a la API sin credenciales configuradas")
+            throw IllegalStateException("GroceryPulse no disponible (simulado en el test)")
         }
     }
 

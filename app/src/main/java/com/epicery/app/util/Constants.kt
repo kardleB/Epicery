@@ -17,6 +17,12 @@ object Constants {
     const val MONTREAL_CITY = "Montreal"
 
     /**
+     * Código postal por defecto usado como input del actor de Apify de GroceryPulse (RF3,
+     * RF5, CA4), que busca por código postal en vez de por nombre de ciudad.
+     */
+    const val MONTREAL_POSTAL_CODE = "H1X 1J7"
+
+    /**
      * Vigencia de la cache persistida de respuestas de APIs externas (USDA FoodData,
      * GroceryPulse) antes de intentar refrescarla con una nueva llamada de red (RNF5).
      * Mientras una entrada esté dentro de esta ventana, se sirve desde Room sin llamar

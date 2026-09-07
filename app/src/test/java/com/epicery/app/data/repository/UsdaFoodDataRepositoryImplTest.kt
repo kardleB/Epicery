@@ -12,16 +12,18 @@ import org.junit.Test
 
 /**
  * Verifica que [UsdaFoodDataRepositoryImpl] nunca deja propagar una excepción cuando USDA
- * FoodData no está disponible (en este entorno de test, `BuildConfig.USDA_API_KEY` está
- * vacío porque no hay `local.properties` — el mismo `check()` que dispara un fallo real de
- * configuración/API en producción): en cambio degrada a la última respuesta cacheada, o a
- * `null` si tampoco hay cache, para que la app siga funcionando con datos locales.
+ * FoodData no está disponible: en cambio degrada a la última respuesta cacheada, o a `null`
+ * si tampoco hay cache, para que la app siga funcionando con datos locales. [UnreachableUsdaFoodDataApi]
+ * lanza [IllegalStateException] (el mismo tipo que dispara el `check()` real de
+ * `UsdaFoodDataRepositoryImpl` cuando falta `USDA_API_KEY`) para simular la falla de forma
+ * determinística, sin depender de si `local.properties` tiene o no la key configurada en la
+ * máquina que corre el test.
  */
 class UsdaFoodDataRepositoryImplTest {
 
     private class UnreachableUsdaFoodDataApi : UsdaFoodDataApi {
         override suspend fun searchFoods(query: String, apiKey: String, pageSize: Int): UsdaFoodSearchResponse {
-            throw AssertionError("no debería llamarse a la API sin una key configurada")
+            throw IllegalStateException("USDA FoodData no disponible (simulado en el test)")
         }
     }
 

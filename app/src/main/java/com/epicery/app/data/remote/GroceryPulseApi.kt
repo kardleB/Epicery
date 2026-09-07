@@ -6,11 +6,12 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
- * Cliente Retrofit de GroceryPulse — el actor de Apify "Canadian Grocery Price
- * Comparison" (RF3, RF5, CA4): compara precios de un artículo en supermercados de
- * Montreal. Corre el actor de forma síncrona (`run-sync-get-dataset-items`), que ejecuta
- * el scraping y devuelve directamente los items de su dataset de salida en la misma
- * respuesta, sin necesidad de sondear el estado del run por separado.
+ * Cliente Retrofit de GroceryPulse — el actor de Apify "Flipp Scraper"
+ * (`chimerical_quicklime/flipp-scraper`, RF3, RF5, CA4): compara precios de un artículo en
+ * comercios de Montreal a partir de un código postal. Corre el actor de forma síncrona
+ * (`run-sync-get-dataset-items`), que ejecuta el scraping y devuelve directamente los items
+ * de su dataset de salida en la misma respuesta, sin necesidad de sondear el estado del run
+ * por separado.
  *
  * Requiere una cuenta de Apify (https://apify.com) con:
  *  - un token de API (`BuildConfig.APIFY_API_TOKEN`), y

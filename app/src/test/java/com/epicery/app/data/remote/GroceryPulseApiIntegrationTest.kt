@@ -62,8 +62,8 @@ class GroceryPulseApiIntegrationTest {
             MockResponse().setResponseCode(200).setBody(
                 """
                 [
-                  {"store": "Metro", "title": "Leche 2%", "price": 3.49, "currency": "CAD", "city": "Montreal", "url": "https://example.com/metro"},
-                  {"store": "IGA", "title": "Leche 2%", "price": 3.29, "currency": "CAD", "city": "Montreal", "url": "https://example.com/iga"}
+                  {"merchant": "Metro", "name": "Leche 2%", "price": 3.49, "postalCode": "H1X 1J7", "url": "https://example.com/metro"},
+                  {"merchant": "IGA", "name": "Leche 2%", "price": 3.29, "postalCode": "H1X 1J7", "url": "https://example.com/iga"}
                 ]
                 """.trimIndent()
             )
@@ -76,9 +76,9 @@ class GroceryPulseApiIntegrationTest {
         )
 
         assertEquals(2, result.size)
-        assertEquals("Metro", result[0].store)
+        assertEquals("Metro", result[0].merchant)
         assertEquals(3.49, result[0].price, 0.0)
-        assertEquals("IGA", result[1].store)
+        assertEquals("IGA", result[1].merchant)
 
         val request = server.takeRequest()
         assertTrue(request.path.orEmpty().contains("/acts/test-actor/run-sync-get-dataset-items"))
