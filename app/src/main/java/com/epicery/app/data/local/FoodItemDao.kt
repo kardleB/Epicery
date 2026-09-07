@@ -25,6 +25,9 @@ interface FoodItemDao {
     @Query("SELECT * FROM food_items WHERE id = :id")
     suspend fun getById(id: Long): FoodItemEntity?
 
+    @Query("SELECT * FROM food_items WHERE name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun getByName(name: String): FoodItemEntity?
+
     @Query("SELECT * FROM food_items ORDER BY name ASC")
     fun getAll(): Flow<List<FoodItemEntity>>
 

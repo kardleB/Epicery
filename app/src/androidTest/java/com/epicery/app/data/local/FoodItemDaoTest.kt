@@ -71,6 +71,24 @@ class FoodItemDaoTest {
     }
 
     @Test
+    fun getByName_isCaseInsensitive() = runTest {
+        dao.insert(sampleFoodItem(name = "Manzanas"))
+
+        val found = dao.getByName("manzanas")
+
+        assertEquals("Manzanas", found?.name)
+    }
+
+    @Test
+    fun getByName_returnsNullWhenNoMatch() = runTest {
+        dao.insert(sampleFoodItem(name = "Manzanas"))
+
+        val found = dao.getByName("Bananas")
+
+        assertNull(found)
+    }
+
+    @Test
     fun update_modifiesStoredFoodItem() = runTest {
         val id = dao.insert(sampleFoodItem())
         val updated = dao.getById(id)!!.copy(calories = 95.0)

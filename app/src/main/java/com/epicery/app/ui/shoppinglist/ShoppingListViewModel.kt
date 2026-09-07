@@ -6,6 +6,7 @@ import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
 import com.epicery.app.domain.repository.GroceryRepository
 import com.epicery.app.domain.usecase.GetWeeklyBudgetUseCase
+import com.epicery.app.domain.usecase.SyncFoodItemToCatalogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
     private val groceryRepository: GroceryRepository,
-    private val getWeeklyBudgetUseCase: GetWeeklyBudgetUseCase
+    private val getWeeklyBudgetUseCase: GetWeeklyBudgetUseCase,
+    private val syncFoodItemToCatalogUseCase: SyncFoodItemToCatalogUseCase
 ) : ViewModel() {
 
     private val weeklyBudget = MutableStateFlow(0.0)
@@ -47,12 +49,17 @@ class ShoppingListViewModel @Inject constructor(
         selectedFoodGroup.value = foodGroup
     }
 
-    /** Alta de un item nuevo (CA1: "el usuario puede crear una lista"). */
+    /**
+     * Alta de un item nuevo (CA1: "el usuario puede crear una lista"). También sincroniza el
+     * catálogo de alimentos (RF1, [SyncFoodItemToCatalogUseCase]) para que el producto quede
+     * disponible en Price Tracker sin un paso aparte de "agregar al catálogo".
+     */
     fun addItem(name: String, foodGroup: FoodGroup, estimatedPrice: Double) {
         viewModelScope.launch {
             groceryRepository.addGroceryItem(
                 GroceryItem(name = name, foodGroup = foodGroup.name, estimatedPrice = estimatedPrice)
             )
+            syncFoodItemToCatalogUseCase(name, foodGroup)
         }
     }
 

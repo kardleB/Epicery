@@ -10,29 +10,28 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Verifica que [GetFoodItemsByCategoryUseCase] consume correctamente a
- * [FoodRepositoryImpl], que a su vez encapsula el acceso al [FoodItemDao] de
- * Room (aqui reemplazado por un fake en memoria para poder correr como test
- * de JVM, sin depender de una base de datos instrumentada).
+ * Verifica que [SyncFoodItemToCatalogUseCase] da de alta un [com.epicery.app.domain.model.FoodItem]
+ * la primera vez que ve un nombre, y no crea duplicados en altas siguientes del mismo nombre
+ * (comparación case-insensitive, igual que hace `GroceryItem` -> `FoodItem` desde
+ * `ShoppingListViewModel.addItem`).
  */
-class GetFoodItemsByCategoryUseCaseTest {
+class SyncFoodItemToCatalogUseCaseTest {
 
-    private class FakeFoodItemDao(seed: List<FoodItemEntity>) : FoodItemDao {
+    private class FakeFoodItemDao(seed: List<FoodItemEntity> = emptyList()) : FoodItemDao {
+        private var nextId = 1L
         private val itemsFlow = MutableStateFlow(seed)
 
         override suspend fun insert(foodItem: FoodItemEntity): Long {
-            itemsFlow.value = itemsFlow.value + foodItem
-            return foodItem.id
+            val withId = if (foodItem.id == 0L) foodItem.copy(id = nextId++) else foodItem
+            itemsFlow.value = itemsFlow.value + withId
+            return withId.id
         }
 
-        override suspend fun insertAll(foodItems: List<FoodItemEntity>): List<Long> {
-            itemsFlow.value = itemsFlow.value + foodItems
-            return foodItems.map { it.id }
-        }
+        override suspend fun insertAll(foodItems: List<FoodItemEntity>): List<Long> =
+            foodItems.map { insert(it) }
 
         override suspend fun update(foodItem: FoodItemEntity) {
             itemsFlow.value = itemsFlow.value.map { if (it.id == foodItem.id) foodItem else it }
@@ -58,17 +57,25 @@ class GetFoodItemsByCategoryUseCaseTest {
     }
 
     @Test
-    fun `returns only food items matching the requested category`() = runBlocking {
-        val apple = FoodItemEntity(id = 1, name = "Manzana", foodGroup = FoodGroup.FRUITS, category = "fresh")
-        val banana = FoodItemEntity(id = 2, name = "Banana", foodGroup = FoodGroup.FRUITS, category = "fresh")
-        val rice = FoodItemEntity(id = 3, name = "Arroz", foodGroup = FoodGroup.GRAINS, category = "pantry")
-        val dao = FakeFoodItemDao(seed = listOf(apple, banana, rice))
-        val useCase = GetFoodItemsByCategoryUseCase(FoodRepositoryImpl(dao))
+    fun `creates a new catalog entry the first time it sees a name`() = runBlocking {
+        val dao = FakeFoodItemDao()
+        val useCase = SyncFoodItemToCatalogUseCase(FoodRepositoryImpl(dao))
 
-        val result = useCase("fresh").first()
+        useCase("Manzanas", FoodGroup.FRUITS)
 
-        assertEquals(2, result.size)
-        assertTrue(result.all { it.category == "fresh" })
-        assertEquals(setOf("Manzana", "Banana"), result.map { it.name }.toSet())
+        val created = dao.getByName("Manzanas")
+        assertEquals("Manzanas", created?.name)
+        assertEquals(FoodGroup.FRUITS, created?.foodGroup)
+    }
+
+    @Test
+    fun `does not create a duplicate when the name already exists, case-insensitively`() = runBlocking {
+        val existing = FoodItemEntity(id = 1, name = "Leche", foodGroup = FoodGroup.DAIRY, category = "DAIRY")
+        val dao = FakeFoodItemDao(seed = listOf(existing))
+        val useCase = SyncFoodItemToCatalogUseCase(FoodRepositoryImpl(dao))
+
+        useCase("leche", FoodGroup.DAIRY)
+
+        assertEquals(1, dao.getAll().first().size)
     }
 }

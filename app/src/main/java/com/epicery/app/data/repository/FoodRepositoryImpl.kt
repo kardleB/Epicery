@@ -25,6 +25,9 @@ class FoodRepositoryImpl @Inject constructor(
     override suspend fun getFoodItemById(id: Long): FoodItem? =
         dao.getById(id)?.toDomain()
 
+    override suspend fun getFoodItemByName(name: String): FoodItem? =
+        dao.getByName(name)?.toDomain()
+
     override suspend fun saveFoodItem(foodItem: FoodItem): Long =
         dao.insert(foodItem.toEntity())
 

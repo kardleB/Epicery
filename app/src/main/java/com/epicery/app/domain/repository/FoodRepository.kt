@@ -13,6 +13,7 @@ interface FoodRepository {
     fun getFoodItemsByCategory(category: String): Flow<List<FoodItem>>
     fun getFoodItemsByFoodGroup(foodGroup: FoodGroup): Flow<List<FoodItem>>
     suspend fun getFoodItemById(id: Long): FoodItem?
+    suspend fun getFoodItemByName(name: String): FoodItem?
     suspend fun saveFoodItem(foodItem: FoodItem): Long
     suspend fun saveFoodItems(foodItems: List<FoodItem>): List<Long>
 }
