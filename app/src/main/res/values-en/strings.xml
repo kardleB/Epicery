@@ -59,6 +59,13 @@
     <string name="shopping_list_share_chooser_title">Share shopping list</string>
 
     <string name="settings_title">Settings</string>
+    <string name="settings_section_account">Account</string>
+    <string name="settings_account_no_email">Account without an email</string>
+    <string name="settings_label_email">Email</string>
+    <string name="settings_label_password">Password</string>
+    <string name="settings_sign_in">Sign in</string>
+    <string name="settings_sign_up">Create account</string>
+    <string name="settings_sign_out">Sign out</string>
     <string name="settings_section_preferences">Preferences</string>
     <string name="settings_use_without_account_title">Use the app without an account</string>
     <string name="settings_use_without_account_desc">Data is saved only on this device, without syncing to the cloud</string>

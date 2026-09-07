@@ -32,11 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.epicery.app.R
 import com.epicery.app.domain.model.AppLanguage
+import com.epicery.app.domain.model.AuthUser
 import com.epicery.app.ui.theme.EpiceryTheme
 
 /**
@@ -65,6 +67,10 @@ fun SettingsScreen(
             onFavoriteSupermarketSelected = viewModel::setFavoriteSupermarket,
             onDefaultWeeklyBudgetChanged = viewModel::setDefaultWeeklyBudget,
             onUseAppWithoutAccountChanged = viewModel::setUseAppWithoutAccount,
+            onSignIn = viewModel::signIn,
+            onSignUp = viewModel::signUp,
+            onSignOut = viewModel::signOut,
+            onDismissAuthError = viewModel::dismissAuthError,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -80,6 +86,10 @@ private fun SettingsContent(
     onFavoriteSupermarketSelected: (String) -> Unit,
     onDefaultWeeklyBudgetChanged: (Double) -> Unit,
     onUseAppWithoutAccountChanged: (Boolean) -> Unit,
+    onSignIn: (String, String) -> Unit,
+    onSignUp: (String, String) -> Unit,
+    onSignOut: () -> Unit,
+    onDismissAuthError: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -89,6 +99,16 @@ private fun SettingsContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        AccountSection(
+            authUser = uiState.authUser,
+            isLoading = uiState.isAuthLoading,
+            error = uiState.authError,
+            onSignIn = onSignIn,
+            onSignUp = onSignUp,
+            onSignOut = onSignOut,
+            onDismissError = onDismissAuthError
+        )
+
         Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(text = stringResource(R.string.settings_section_preferences), style = MaterialTheme.typography.titleMedium)
@@ -129,6 +149,84 @@ private fun SettingsContent(
                     checked = uiState.useAppWithoutAccount,
                     onCheckedChange = onUseAppWithoutAccountChanged
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Sección "Cuenta" (ver `docs/design/wireframes.md`): la cuenta es opcional (RF5,
+ * `useAppWithoutAccount` sigue disponible con o sin sesión iniciada). Con sesión iniciada
+ * muestra el email y "Cerrar sesión"; sin sesión, un formulario mínimo de email/contraseña con
+ * "Iniciar sesión" y "Crear cuenta".
+ */
+@Composable
+private fun AccountSection(
+    authUser: AuthUser?,
+    isLoading: Boolean,
+    error: String?,
+    onSignIn: (String, String) -> Unit,
+    onSignUp: (String, String) -> Unit,
+    onSignOut: () -> Unit,
+    onDismissError: () -> Unit
+) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(text = stringResource(R.string.settings_section_account), style = MaterialTheme.typography.titleMedium)
+
+            if (authUser != null) {
+                Text(
+                    text = authUser.email ?: stringResource(R.string.settings_account_no_email),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = onSignOut) {
+                        Text(stringResource(R.string.settings_sign_out))
+                    }
+                }
+            } else {
+                var email by rememberSaveable { mutableStateOf("") }
+                var password by rememberSaveable { mutableStateOf("") }
+                val canSubmit = email.isNotBlank() && password.isNotBlank() && !isLoading
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        if (error != null) onDismissError()
+                    },
+                    label = { Text(stringResource(R.string.settings_label_email)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        if (error != null) onDismissError()
+                    },
+                    label = { Text(stringResource(R.string.settings_label_password)) },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (error != null) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = { onSignIn(email, password) }, enabled = canSubmit) {
+                        Text(stringResource(R.string.settings_sign_in))
+                    }
+                    TextButton(onClick = { onSignUp(email, password) }, enabled = canSubmit) {
+                        Text(stringResource(R.string.settings_sign_up))
+                    }
+                }
             }
         }
     }
@@ -263,7 +361,11 @@ private fun SettingsContentPreview() {
             onLanguageSelected = {},
             onFavoriteSupermarketSelected = {},
             onDefaultWeeklyBudgetChanged = {},
-            onUseAppWithoutAccountChanged = {}
+            onUseAppWithoutAccountChanged = {},
+            onSignIn = { _, _ -> },
+            onSignUp = { _, _ -> },
+            onSignOut = {},
+            onDismissAuthError = {}
         )
     }
 }

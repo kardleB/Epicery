@@ -1,5 +1,6 @@
 package com.epicery.app.di
 
+import com.epicery.app.data.repository.AuthRepositoryImpl
 import com.epicery.app.data.repository.BudgetRepositoryImpl
 import com.epicery.app.data.repository.FoodRepositoryImpl
 import com.epicery.app.data.repository.GroceryPulseRepositoryImpl
@@ -7,6 +8,7 @@ import com.epicery.app.data.repository.GroceryRepositoryImpl
 import com.epicery.app.data.repository.PriceRepositoryImpl
 import com.epicery.app.data.repository.SettingsRepositoryImpl
 import com.epicery.app.data.repository.UsdaFoodDataRepositoryImpl
+import com.epicery.app.domain.repository.AuthRepository
 import com.epicery.app.domain.repository.BudgetRepository
 import com.epicery.app.domain.repository.FoodRepository
 import com.epicery.app.domain.repository.GroceryPulseRepository
@@ -51,4 +53,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 }

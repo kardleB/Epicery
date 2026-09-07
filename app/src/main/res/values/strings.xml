@@ -56,8 +56,17 @@
     <string name="shopping_list_title">Liste d\'épicerie</string>
     <string name="shopping_list_total_estimated_title">Total estimé</string>
     <string name="shopping_list_edit_price_title">Modifier le prix de %1$s</string>
+    <string name="shopping_list_share_action">Partager la liste</string>
+    <string name="shopping_list_share_chooser_title">Partager la liste d\'épicerie</string>
 
     <string name="settings_title">Paramètres</string>
+    <string name="settings_section_account">Compte</string>
+    <string name="settings_account_no_email">Compte sans adresse e-mail</string>
+    <string name="settings_label_email">E-mail</string>
+    <string name="settings_label_password">Mot de passe</string>
+    <string name="settings_sign_in">Se connecter</string>
+    <string name="settings_sign_up">Créer un compte</string>
+    <string name="settings_sign_out">Se déconnecter</string>
     <string name="settings_section_preferences">Préférences</string>
     <string name="settings_use_without_account_title">Utiliser l\'application sans compte</string>
     <string name="settings_use_without_account_desc">Les données sont enregistrées uniquement sur cet appareil, sans synchronisation avec le nuage</string>
