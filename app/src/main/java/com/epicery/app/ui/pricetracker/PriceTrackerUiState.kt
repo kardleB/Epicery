@@ -26,7 +26,8 @@ data class PriceTrackerUiState(
     val averagePrice: Double = 0.0,
     val latestPrice: Double? = null,
     val trend: PriceTrend = PriceTrend.STABLE,
-    val priceAlert: PriceAlert? = null
+    val priceAlert: PriceAlert? = null,
+    val isComparingPrices: Boolean = false
 ) {
     val hasHistory: Boolean get() = priceHistory.size >= 2
     val isPriceHigh: Boolean get() = priceAlert != null

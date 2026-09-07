@@ -15,6 +15,8 @@ import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingFlat
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -80,6 +82,7 @@ fun PriceTrackerScreen(
             PriceTrackerContent(
                 uiState = uiState,
                 onFoodItemSelected = viewModel::selectFoodItem,
+                onCompareMontrealPrices = viewModel::compareMontrealPrices,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -92,6 +95,7 @@ fun PriceTrackerScreen(
 private fun PriceTrackerContent(
     uiState: PriceTrackerUiState,
     onFoodItemSelected: (FoodItem) -> Unit,
+    onCompareMontrealPrices: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -106,6 +110,14 @@ private fun PriceTrackerContent(
             onFoodItemSelected = onFoodItemSelected,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (uiState.selectedFoodItem != null) {
+            CompareMontrealPricesButton(
+                isComparing = uiState.isComparingPrices,
+                onClick = onCompareMontrealPrices,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         when {
             uiState.selectedFoodItem == null -> HintState(stringResource(R.string.price_tracker_hint_select_product))
@@ -170,6 +182,30 @@ private fun ProductSelector(
                     }
                 )
             }
+        }
+    }
+}
+
+/**
+ * Dispara [PriceTrackerViewModel.compareMontrealPrices] (GroceryPulse/Apify, RF3, RF5, CA4).
+ * Es una acción explícita del usuario (no se dispara solo al tipear o seleccionar un producto)
+ * a propósito: cada click consume crédito de la cuenta de Apify configurada (ver README).
+ */
+@Composable
+private fun CompareMontrealPricesButton(
+    isComparing: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(onClick = onClick, enabled = !isComparing, modifier = modifier) {
+        if (isComparing) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(stringResource(R.string.price_tracker_compare_button))
         }
     }
 }
@@ -301,7 +337,8 @@ private fun PriceTrackerContentPreview() {
                 latestPrice = 4.5,
                 trend = PriceTrend.UP
             ),
-            onFoodItemSelected = {}
+            onFoodItemSelected = {},
+            onCompareMontrealPrices = {}
         )
     }
 }

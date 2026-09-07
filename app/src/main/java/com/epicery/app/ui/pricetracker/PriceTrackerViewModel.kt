@@ -8,6 +8,7 @@ import com.epicery.app.domain.model.PriceAlert
 import com.epicery.app.domain.model.PriceHistory
 import com.epicery.app.domain.repository.FoodRepository
 import com.epicery.app.domain.repository.PriceRepository
+import com.epicery.app.domain.usecase.GetMontrealGroceryPricesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,18 +18,21 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PriceTrackerViewModel @Inject constructor(
     foodRepository: FoodRepository,
-    priceRepository: PriceRepository
+    priceRepository: PriceRepository,
+    private val getMontrealGroceryPricesUseCase: GetMontrealGroceryPricesUseCase
 ) : ViewModel() {
 
     private val budgetCalculator = BudgetCalculator()
 
     private val selectedFoodItemId = MutableStateFlow<Long?>(null)
+    private val isComparingPrices = MutableStateFlow(false)
 
     private val selectedPriceHistory = selectedFoodItemId.flatMapLatest { foodItemId ->
         if (foodItemId == null) flowOf(emptyList()) else priceRepository.getPriceHistoryForFoodItem(foodItemId)
@@ -37,9 +41,10 @@ class PriceTrackerViewModel @Inject constructor(
     val uiState: StateFlow<PriceTrackerUiState> = combine(
         foodRepository.getFoodItems(),
         selectedFoodItemId,
-        selectedPriceHistory
-    ) { foodItems, selectedId, history ->
-        buildUiState(foodItems, selectedId, history)
+        selectedPriceHistory,
+        isComparingPrices
+    ) { foodItems, selectedId, history, isComparing ->
+        buildUiState(foodItems, selectedId, history, isComparing)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -51,10 +56,29 @@ class PriceTrackerViewModel @Inject constructor(
         selectedFoodItemId.value = foodItem.id
     }
 
+    /**
+     * Dispara la comparación de precios en Montreal (GroceryPulse/Apify, RF3, RF5, CA4) para
+     * el artículo seleccionado. Cada cotización obtenida se persiste como [PriceHistory] (ver
+     * [GetMontrealGroceryPricesUseCase]), así que el resultado se refleja solo a través del
+     * flujo reactivo existente de [priceRepository] — no hace falta un estado aparte para el
+     * resultado. Si GroceryPulse falla o no está configurado, el error explícito ya lo muestra
+     * el [com.epicery.app.ui.common.ApiErrorBanner] global (ver [ApiErrorState]), acá solo se
+     * controla el spinner del botón.
+     */
+    fun compareMontrealPrices() {
+        val foodItem = uiState.value.selectedFoodItem ?: return
+        viewModelScope.launch {
+            isComparingPrices.value = true
+            getMontrealGroceryPricesUseCase(foodItem.id, foodItem.name)
+            isComparingPrices.value = false
+        }
+    }
+
     private fun buildUiState(
         foodItems: List<FoodItem>,
         selectedId: Long?,
-        history: List<PriceHistory>
+        history: List<PriceHistory>,
+        isComparingPrices: Boolean
     ): PriceTrackerUiState {
         val selectedFoodItem = foodItems.find { it.id == selectedId }
         val chronologicalHistory = history.sortedBy { it.recordedAt }
@@ -71,7 +95,8 @@ class PriceTrackerViewModel @Inject constructor(
             averagePrice = averagePrice,
             latestPrice = chronologicalHistory.lastOrNull()?.price,
             trend = computeTrend(chronologicalHistory),
-            priceAlert = selectedFoodItem?.let { foodItem -> computePriceAlert(foodItem.name, chronologicalHistory) }
+            priceAlert = selectedFoodItem?.let { foodItem -> computePriceAlert(foodItem.name, chronologicalHistory) },
+            isComparingPrices = isComparingPrices
         )
     }
 

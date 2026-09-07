@@ -44,6 +44,7 @@
     <string name="budget_no_purchases">Vous n\'avez encore coché aucun article comme acheté</string>
 
     <string name="price_tracker_title">Suivi des prix</string>
+    <string name="price_tracker_compare_button">Comparer les prix à Montréal</string>
     <string name="price_tracker_hint_select_product">Sélectionnez un produit pour voir son historique de prix</string>
     <string name="price_tracker_hint_no_history">Il n\'y a pas encore assez d\'historique de prix pour %1$s</string>
     <string name="price_tracker_high_price_alert">Prix élevé : %1$s dépasse la moyenne historique de %2$s</string>
