@@ -70,10 +70,12 @@ class ShoppingListViewModel @Inject constructor(
         }
     }
 
-    /** Edita el precio estimado de un item ya existente. */
-    fun updatePrice(item: GroceryItem, newPrice: Double) {
+    /** Edita un item ya existente: nombre, grupo alimenticio y precio estimado. */
+    fun updateItem(item: GroceryItem, name: String, foodGroup: FoodGroup, estimatedPrice: Double) {
         viewModelScope.launch {
-            groceryRepository.updateGroceryItem(item.copy(estimatedPrice = newPrice))
+            groceryRepository.updateGroceryItem(
+                item.copy(name = name, foodGroup = foodGroup.name, estimatedPrice = estimatedPrice)
+            )
         }
     }
 

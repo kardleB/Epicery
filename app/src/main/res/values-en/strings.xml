@@ -19,6 +19,9 @@
     <string name="food_group_grains">Grains</string>
     <string name="food_group_protein">Protein</string>
     <string name="food_group_dairy">Dairy</string>
+    <string name="food_group_oils">Oils</string>
+    <string name="food_group_cereals">Breakfast cereals</string>
+    <string name="food_group_cleaning">Cleaning products</string>
 
     <string name="nav_home">Home</string>
     <string name="nav_shopping_list">List</string>
@@ -55,7 +58,8 @@
 
     <string name="shopping_list_title">Shopping List</string>
     <string name="shopping_list_total_estimated_title">Estimated total</string>
-    <string name="shopping_list_edit_price_title">Edit price for %1$s</string>
+    <string name="shopping_list_edit_item_title">Edit %1$s</string>
+    <string name="shopping_list_edit_item_action">Edit item</string>
     <string name="shopping_list_share_action">Share list</string>
     <string name="shopping_list_share_chooser_title">Share shopping list</string>
 

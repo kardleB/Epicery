@@ -97,7 +97,7 @@ fun ShoppingListScreen(
                 else -> ShoppingListContent(
                     itemsByGroup = uiState.itemsByGroup,
                     onTogglePurchased = viewModel::togglePurchased,
-                    onPriceClick = { editingItem = it }
+                    onEditClick = { editingItem = it }
                 )
             }
         }
@@ -114,11 +114,11 @@ fun ShoppingListScreen(
     }
 
     editingItem?.let { item ->
-        EditPriceDialog(
+        EditItemDialog(
             item = item,
             onDismiss = { editingItem = null },
-            onConfirm = { newPrice ->
-                viewModel.updatePrice(item, newPrice)
+            onConfirm = { name, foodGroup, price ->
+                viewModel.updateItem(item, name, foodGroup, price)
                 editingItem = null
             }
         )
@@ -153,7 +153,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 private fun ShoppingListContent(
     itemsByGroup: Map<FoodGroup, List<GroceryItem>>,
     onTogglePurchased: (GroceryItem) -> Unit,
-    onPriceClick: (GroceryItem) -> Unit,
+    onEditClick: (GroceryItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -177,7 +177,7 @@ private fun ShoppingListContent(
                         item = groceryItem,
                         foodGroup = group,
                         onTogglePurchased = { onTogglePurchased(groceryItem) },
-                        onPriceClick = { onPriceClick(groceryItem) }
+                        onEditClick = { onEditClick(groceryItem) }
                     )
                 }
             }
@@ -259,30 +259,72 @@ private fun AddItemDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditPriceDialog(
+private fun EditItemDialog(
     item: GroceryItem,
     onDismiss: () -> Unit,
-    onConfirm: (newPrice: Double) -> Unit
+    onConfirm: (name: String, foodGroup: FoodGroup, estimatedPrice: Double) -> Unit
 ) {
+    var name by rememberSaveable(item.id) { mutableStateOf(item.name) }
     var priceText by rememberSaveable(item.id) { mutableStateOf(item.estimatedPrice.toString()) }
+    var selectedGroup by rememberSaveable(item.id) {
+        mutableStateOf(runCatching { FoodGroup.valueOf(item.foodGroup) }.getOrDefault(FoodGroup.FRUITS))
+    }
+    var expanded by remember { mutableStateOf(false) }
+
     val price = priceText.toDoubleOrNull()
-    val isValid = price != null && price >= 0
+    val isValid = name.isNotBlank() && price != null && price >= 0
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.shopping_list_edit_price_title, item.name)) },
+        title = { Text(stringResource(R.string.shopping_list_edit_item_title, item.name)) },
         text = {
-            OutlinedTextField(
-                value = priceText,
-                onValueChange = { priceText = it },
-                label = { Text(stringResource(R.string.label_estimated_price)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.label_name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+                    OutlinedTextField(
+                        value = foodGroupLabel(selectedGroup),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.label_food_group)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        FoodGroup.entries.forEach { group ->
+                            DropdownMenuItem(
+                                text = { Text(foodGroupLabel(group)) },
+                                onClick = {
+                                    selectedGroup = group
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = priceText,
+                    onValueChange = { priceText = it },
+                    label = { Text(stringResource(R.string.label_estimated_price)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         },
         confirmButton = {
-            TextButton(enabled = isValid, onClick = { onConfirm(price ?: item.estimatedPrice) }) {
+            TextButton(
+                enabled = isValid,
+                onClick = { onConfirm(name.trim(), selectedGroup, price ?: item.estimatedPrice) }
+            ) {
                 Text(stringResource(R.string.action_save))
             }
         },
@@ -304,7 +346,7 @@ private fun ShoppingListContentPreview() {
                 FoodGroup.PROTEIN to listOf(GroceryItem(2, "Pollo", "PROTEIN", 12.0, isPurchased = true))
             ),
             onTogglePurchased = {},
-            onPriceClick = {}
+            onEditClick = {}
         )
     }
 }
