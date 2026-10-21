@@ -15,6 +15,8 @@ data class ShoppingListUiState(
     val isLoading: Boolean = true,
     val weeklyBudget: Double = 0.0,
     val totalEstimated: Double = 0.0,
+    val purchasedCount: Int = 0,
+    val purchasedTotal: Double = 0.0,
     val selectedFoodGroup: FoodGroup? = null,
     val itemsByGroup: Map<FoodGroup, List<GroceryItem>> = emptyMap(),
     val allItems: List<GroceryItem> = emptyList()

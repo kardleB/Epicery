@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.epicery.app.BuildConfig
 import com.epicery.app.data.local.APP_DATABASE_MIGRATIONS
 import com.epicery.app.data.local.AppDatabase
+import com.epicery.app.data.local.ExpenseDao
 import com.epicery.app.data.local.FoodItemDao
 import com.epicery.app.data.local.GroceryItemDao
 import com.epicery.app.data.local.GroceryPriceCacheDao
@@ -64,4 +65,7 @@ object DatabaseModule {
 
     @Provides
     fun provideMonthlyBudgetDao(database: AppDatabase): MonthlyBudgetDao = database.monthlyBudgetDao()
+
+    @Provides
+    fun provideExpenseDao(database: AppDatabase): ExpenseDao = database.expenseDao()
 }

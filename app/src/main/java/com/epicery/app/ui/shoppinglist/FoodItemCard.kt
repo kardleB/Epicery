@@ -76,7 +76,7 @@ fun FoodItemCard(
                 )
             }
             Text(
-                text = formatPrice(item.estimatedPrice),
+                text = formatPrice(if (item.isPurchased) item.spentAmount else item.estimatedPrice),
                 style = MaterialTheme.typography.bodyMedium,
                 textDecoration = if (item.isPurchased) TextDecoration.LineThrough else null
             )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.domain.repository.ExpenseRepository
 import com.epicery.app.domain.repository.GroceryRepository
 import com.epicery.app.domain.repository.SettingsRepository
 import com.epicery.app.domain.usecase.SyncFoodItemToCatalogUseCase
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
     private val groceryRepository: GroceryRepository,
+    private val expenseRepository: ExpenseRepository,
     settingsRepository: SettingsRepository,
     private val syncFoodItemToCatalogUseCase: SyncFoodItemToCatalogUseCase
 ) : ViewModel() {
@@ -74,12 +77,36 @@ class ShoppingListViewModel @Inject constructor(
         }
     }
 
-    /** Edita un item ya existente: nombre, grupo alimenticio y precio estimado. */
-    fun updateItem(item: GroceryItem, name: String, foodGroup: FoodGroup, estimatedPrice: Double) {
+    /**
+     * Edita un item ya existente: nombre, grupo alimenticio, precio estimado y, si ya esta comprado,
+     * el precio realmente pagado (`null` = usar el estimado).
+     */
+    fun updateItem(
+        item: GroceryItem,
+        name: String,
+        foodGroup: FoodGroup,
+        estimatedPrice: Double,
+        pricePaid: Double? = item.pricePaid
+    ) {
         viewModelScope.launch {
             groceryRepository.updateGroceryItem(
-                item.copy(name = name, foodGroup = foodGroup.name, estimatedPrice = estimatedPrice)
+                item.copy(
+                    name = name,
+                    foodGroup = foodGroup.name,
+                    estimatedPrice = estimatedPrice,
+                    pricePaid = if (item.isPurchased) pricePaid else null
+                )
             )
+        }
+    }
+
+    /**
+     * Termina la compra: los items marcados como comprados pasan a "Gastos por semana" con lo que se
+     * pago y salen de la lista; los pendientes se quedan.
+     */
+    fun finishShopping() {
+        viewModelScope.launch {
+            expenseRepository.archivePurchased(groceryRepository.getGroceryItems().first(), System.currentTimeMillis())
         }
     }
 
@@ -100,6 +127,8 @@ class ShoppingListViewModel @Inject constructor(
             isLoading = false,
             weeklyBudget = budget,
             totalEstimated = items.sumOf { it.estimatedPrice },
+            purchasedCount = items.count { it.isPurchased },
+            purchasedTotal = items.filter { it.isPurchased }.sumOf { it.spentAmount },
             selectedFoodGroup = selectedGroup,
             itemsByGroup = itemsByGroup,
             allItems = items

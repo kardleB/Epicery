@@ -60,12 +60,21 @@ fun ShoppingListScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showAddDialog by rememberSaveable { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<GroceryItem?>(null) }
+    var showFinishDialog by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.shopping_list_title), style = MaterialTheme.typography.headlineSmall) }
+                title = { Text(stringResource(R.string.shopping_list_title), style = MaterialTheme.typography.headlineSmall) },
+                actions = {
+                    TextButton(
+                        enabled = uiState.purchasedCount > 0,
+                        onClick = { showFinishDialog = true }
+                    ) {
+                        Text(stringResource(R.string.shopping_finish_action))
+                    }
+                }
             )
         },
         floatingActionButton = {
@@ -117,9 +126,40 @@ fun ShoppingListScreen(
         EditItemDialog(
             item = item,
             onDismiss = { editingItem = null },
-            onConfirm = { name, foodGroup, price ->
-                viewModel.updateItem(item, name, foodGroup, price)
+            onConfirm = { name, foodGroup, price, pricePaid ->
+                viewModel.updateItem(item, name, foodGroup, price, pricePaid)
                 editingItem = null
+            }
+        )
+    }
+
+    if (showFinishDialog) {
+        AlertDialog(
+            onDismissRequest = { showFinishDialog = false },
+            title = { Text(stringResource(R.string.shopping_finish_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.shopping_finish_body,
+                        uiState.purchasedCount,
+                        "$${"%.2f".format(java.util.Locale.ROOT, uiState.purchasedTotal)}"
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.finishShopping()
+                        showFinishDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.shopping_finish_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFinishDialog = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             }
         )
     }
@@ -264,17 +304,20 @@ private fun AddItemDialog(
 private fun EditItemDialog(
     item: GroceryItem,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, foodGroup: FoodGroup, estimatedPrice: Double) -> Unit
+    onConfirm: (name: String, foodGroup: FoodGroup, estimatedPrice: Double, pricePaid: Double?) -> Unit
 ) {
     var name by rememberSaveable(item.id) { mutableStateOf(item.name) }
     var priceText by rememberSaveable(item.id) { mutableStateOf(item.estimatedPrice.toString()) }
+    var paidText by rememberSaveable(item.id) { mutableStateOf(item.pricePaid?.toString().orEmpty()) }
     var selectedGroup by rememberSaveable(item.id) {
         mutableStateOf(runCatching { FoodGroup.valueOf(item.foodGroup) }.getOrDefault(FoodGroup.FRUITS))
     }
     var expanded by remember { mutableStateOf(false) }
 
     val price = priceText.toDoubleOrNull()
-    val isValid = name.isNotBlank() && price != null && price >= 0
+    val paid = paidText.replace(',', '.').toDoubleOrNull()
+    val isPaidValid = paidText.isBlank() || (paid != null && paid >= 0 && paid.isFinite())
+    val isValid = name.isNotBlank() && price != null && price >= 0 && isPaidValid
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -318,12 +361,22 @@ private fun EditItemDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (item.isPurchased) {
+                    OutlinedTextField(
+                        value = paidText,
+                        onValueChange = { paidText = it },
+                        label = { Text(stringResource(R.string.label_price_paid)) },
+                        singleLine = true,
+                        isError = !isPaidValid,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         },
         confirmButton = {
             TextButton(
                 enabled = isValid,
-                onClick = { onConfirm(name.trim(), selectedGroup, price ?: item.estimatedPrice) }
+                onClick = { onConfirm(name.trim(), selectedGroup, price ?: item.estimatedPrice, paid) }
             ) {
                 Text(stringResource(R.string.action_save))
             }

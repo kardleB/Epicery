@@ -1,16 +1,13 @@
 package com.epicery.app.domain.calculator
 
-import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.domain.model.SpendingEntry
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Verifica la semana de gasto (lunes a domingo, hora de Montreal) y que solo cuenten las
- * compras de la semana actual, con el precio pagado cuando existe y el estimado si no.
- */
+/** Verifica la semana de gasto (lunes a domingo, hora de Montreal) y que solo cuenten las compras de la semana actual. */
 class WeeklySpendingTest {
 
     private val zone: ZoneId = WeeklySpending.MONTREAL_ZONE
@@ -18,20 +15,8 @@ class WeeklySpendingTest {
     private fun millis(year: Int, month: Int, day: Int, hour: Int = 12, minute: Int = 0): Long =
         ZonedDateTime.of(year, month, day, hour, minute, 0, 0, zone).toInstant().toEpochMilli()
 
-    private fun item(
-        name: String,
-        price: Double,
-        purchased: Boolean = true,
-        purchasedAt: Long? = null,
-        pricePaid: Double? = null
-    ) = GroceryItem(
-        name = name,
-        foodGroup = "FRUITS",
-        estimatedPrice = price,
-        isPurchased = purchased,
-        purchasedAt = purchasedAt,
-        pricePaid = pricePaid
-    )
+    private fun entry(name: String, amount: Double, purchasedAt: Long, archived: Boolean = false) =
+        SpendingEntry(name, "FRUITS", amount, purchasedAt, archived)
 
     // 2026-10-21 es miercoles: su semana va del lunes 2026-10-19 al domingo 2026-10-25.
     private val wednesday = millis(2026, 10, 21)
@@ -65,36 +50,21 @@ class WeeklySpendingTest {
     }
 
     @Test
-    fun `only items bought this week are counted`() {
-        val items = listOf(
-            item("Esta semana", 5.0, purchasedAt = millis(2026, 10, 20)),
-            item("Semana pasada", 7.0, purchasedAt = millis(2026, 10, 18, 23, 59)),
-            item("Proxima semana", 9.0, purchasedAt = millis(2026, 10, 26, 0, 0))
+    fun `only entries bought this week are counted, archived or not`() {
+        val entries = listOf(
+            entry("Esta semana", 5.0, millis(2026, 10, 20)),
+            entry("Archivada esta semana", 6.0, millis(2026, 10, 19, 0, 0), archived = true),
+            entry("Semana pasada", 7.0, millis(2026, 10, 18, 23, 59)),
+            entry("Proxima semana", 9.0, millis(2026, 10, 26, 0, 0))
         )
 
-        val result = WeeklySpending.purchasedThisWeek(items, wednesday)
+        val result = WeeklySpending.inWeek(entries, wednesday)
 
-        assertEquals(listOf("Esta semana"), result.map { it.name })
+        assertEquals(listOf("Esta semana", "Archivada esta semana"), result.map { it.name })
     }
 
     @Test
-    fun `items not marked as purchased are never counted`() {
-        val items = listOf(item("Pendiente", 5.0, purchased = false, purchasedAt = millis(2026, 10, 20)))
-
-        assertTrue(WeeklySpending.purchasedThisWeek(items, wednesday).isEmpty())
-    }
-
-    @Test
-    fun `purchased item without a date counts in the current week`() {
-        val items = listOf(item("Dato antiguo", 5.0, purchasedAt = null))
-
-        assertEquals(1, WeeklySpending.purchasedThisWeek(items, wednesday).size)
-    }
-
-    @Test
-    fun `spent amount prefers the price paid over the estimate`() {
-        assertEquals(4.0, item("Con precio real", 5.0, pricePaid = 4.0).spentAmount, 0.0001)
-        assertEquals(5.0, item("Sin precio real", 5.0).spentAmount, 0.0001)
-        assertEquals(0.0, item("Gratis", 5.0, pricePaid = 0.0).spentAmount, 0.0001)
+    fun `no entries means nothing this week`() {
+        assertTrue(WeeklySpending.inWeek(emptyList(), wednesday).isEmpty())
     }
 }

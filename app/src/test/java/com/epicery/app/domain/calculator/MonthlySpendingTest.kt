@@ -1,10 +1,10 @@
 package com.epicery.app.domain.calculator
 
-import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.domain.model.SpendingEntry
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Verifica el mes calendario de Montreal, que compras cuentan en cada mes y el estado del presupuesto. */
@@ -16,19 +16,13 @@ class MonthlySpendingTest {
     private fun millis(year: Int, month: Int, day: Int, hour: Int = 12, minute: Int = 0): Long =
         ZonedDateTime.of(year, month, day, hour, minute, 0, 0, zone).toInstant().toEpochMilli()
 
-    private fun item(name: String, price: Double, purchasedAt: Long?, purchased: Boolean = true) = GroceryItem(
-        name = name,
-        foodGroup = "FRUITS",
-        estimatedPrice = price,
-        isPurchased = purchased,
-        purchasedAt = purchasedAt
-    )
+    private fun entry(name: String, amount: Double, purchasedAt: Long) =
+        SpendingEntry(name, "FRUITS", amount, purchasedAt, isArchived = false)
 
     @Test
     fun `month is read in Montreal time and not in UTC`() {
         // 2026-11-01 02:30 UTC todavia es 2026-10-31 22:30 en Montreal.
-        val utcNovemberFirst = ZonedDateTime.of(2026, 11, 1, 2, 30, 0, 0, java.time.ZoneOffset.UTC)
-            .toInstant().toEpochMilli()
+        val utcNovemberFirst = ZonedDateTime.of(2026, 11, 1, 2, 30, 0, 0, ZoneOffset.UTC).toInstant().toEpochMilli()
 
         assertEquals(october, MonthlySpending.monthOf(utcNovemberFirst))
     }
@@ -41,28 +35,14 @@ class MonthlySpendingTest {
     }
 
     @Test
-    fun `only items bought in the month are counted`() {
-        val now = millis(2026, 10, 21)
-        val items = listOf(
-            item("Octubre", 5.0, millis(2026, 10, 3)),
-            item("Septiembre", 7.0, millis(2026, 9, 30, 23, 59)),
-            item("Noviembre", 9.0, millis(2026, 11, 1, 0, 0)),
-            item("Pendiente", 11.0, millis(2026, 10, 3), purchased = false)
+    fun `only entries bought in the month are counted`() {
+        val entries = listOf(
+            entry("Octubre", 5.0, millis(2026, 10, 3)),
+            entry("Septiembre", 7.0, millis(2026, 9, 30, 23, 59)),
+            entry("Noviembre", 9.0, millis(2026, 11, 1, 0, 0))
         )
 
-        val result = MonthlySpending.purchasedInMonth(items, october, now)
-
-        assertEquals(listOf("Octubre"), result.map { it.name })
-    }
-
-    @Test
-    fun `purchased item without a date counts in the current month`() {
-        val now = millis(2026, 10, 21)
-
-        assertEquals(1, MonthlySpending.purchasedInMonth(listOf(item("Antiguo", 5.0, null)), october, now).size)
-        assertTrue(
-            MonthlySpending.purchasedInMonth(listOf(item("Antiguo", 5.0, null)), YearMonth.of(2026, 9), now).isEmpty()
-        )
+        assertEquals(listOf("Octubre"), MonthlySpending.inMonth(entries, october).map { it.name })
     }
 
     @Test

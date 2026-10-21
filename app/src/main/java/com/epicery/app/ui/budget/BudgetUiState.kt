@@ -3,6 +3,7 @@ package com.epicery.app.ui.budget
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.calculator.MonthlyBudgetStatus
 import com.epicery.app.domain.calculator.MonthlySpending
+import com.epicery.app.domain.calculator.WeekSpending
 import java.time.YearMonth
 
 /**
@@ -24,7 +25,8 @@ data class BudgetUiState(
     val month: YearMonth? = null,
     val monthlyBudget: Double = 0.0,
     val monthlySpent: Double = 0.0,
-    val previousMonthlyBudget: Double = 0.0
+    val previousMonthlyBudget: Double = 0.0,
+    val weeks: List<WeekSpending> = emptyList()
 ) {
     val progress: Float
         get() = if (weeklyBudget > 0) (weeklySpent / weeklyBudget).toFloat().coerceIn(0f, 1f) else 0f

@@ -1,6 +1,6 @@
 package com.epicery.app.domain.calculator
 
-import com.epicery.app.domain.model.GroceryItem
+import com.epicery.app.domain.model.SpendingEntry
 import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneId
@@ -25,21 +25,15 @@ object MonthlySpending {
     /** Fraccion del presupuesto a partir de la cual se avisa. */
     const val WARNING_RATIO = 0.8
 
-    fun monthOf(nowMillis: Long, zone: ZoneId = WeeklySpending.MONTREAL_ZONE): YearMonth =
-        YearMonth.from(Instant.ofEpochMilli(nowMillis).atZone(zone))
+    fun monthOf(millis: Long, zone: ZoneId = WeeklySpending.MONTREAL_ZONE): YearMonth =
+        YearMonth.from(Instant.ofEpochMilli(millis).atZone(zone))
 
-    /**
-     * Items comprados en [month]. Un item marcado como comprado sin fecha (dato antiguo) cuenta en
-     * el mes de [nowMillis].
-     */
-    fun purchasedInMonth(
-        items: List<GroceryItem>,
+    /** Lineas de gasto compradas en [month], segun su fecha de compra. */
+    fun inMonth(
+        entries: List<SpendingEntry>,
         month: YearMonth,
-        nowMillis: Long,
         zone: ZoneId = WeeklySpending.MONTREAL_ZONE
-    ): List<GroceryItem> = items.filter { item ->
-        item.isPurchased && monthOf(item.purchasedAt ?: nowMillis, zone) == month
-    }
+    ): List<SpendingEntry> = entries.filter { monthOf(it.purchasedAt, zone) == month }
 
     fun status(spent: Double, budget: Double): MonthlyBudgetStatus = when {
         budget <= 0.0 -> MonthlyBudgetStatus.NOT_SET

@@ -54,6 +54,15 @@
     <string name="budget_month_dialog_title">Monthly budget</string>
     <string name="budget_month_dialog_label">Amount ($ CAD)</string>
     <string name="budget_month_dialog_suggestion">Suggestion based on your weekly budget</string>
+    <string name="shopping_finish_action">Finish</string>
+    <string name="shopping_finish_title">Finish shopping</string>
+    <string name="shopping_finish_body">The checked items (%1$d, %2$s) will be saved to this week\'s spending and removed from the list. The rest stay.</string>
+    <string name="shopping_finish_confirm">Finish</string>
+    <string name="label_price_paid">Price paid (optional)</string>
+    <string name="budget_weeks_title">Spending by week</string>
+    <string name="budget_weeks_empty">No purchases this month</string>
+    <string name="budget_week_range">%1$s – %2$s</string>
+    <string name="budget_week_items_count">%1$d item(s)</string>
     <string name="budget_no_purchases">You haven\'t marked any item as purchased yet</string>
 
     <string name="price_tracker_title">Price Tracker</string>

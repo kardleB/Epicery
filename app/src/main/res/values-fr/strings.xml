@@ -55,6 +55,15 @@
     <string name="budget_month_dialog_title">Budget du mois</string>
     <string name="budget_month_dialog_label">Montant ($ CAD)</string>
     <string name="budget_month_dialog_suggestion">Suggestion calculée à partir de votre budget hebdomadaire</string>
+    <string name="shopping_finish_action">Terminer</string>
+    <string name="shopping_finish_title">Terminer les achats</string>
+    <string name="shopping_finish_body">Les articles cochés (%1$d, %2$s) seront enregistrés dans les dépenses de la semaine et retirés de la liste. Les autres restent.</string>
+    <string name="shopping_finish_confirm">Terminer</string>
+    <string name="label_price_paid">Prix payé (facultatif)</string>
+    <string name="budget_weeks_title">Dépenses par semaine</string>
+    <string name="budget_weeks_empty">Aucun achat ce mois-ci</string>
+    <string name="budget_week_range">%1$s – %2$s</string>
+    <string name="budget_week_items_count">%1$d article(s)</string>
     <string name="budget_no_purchases">Vous n\'avez encore coché aucun article comme acheté</string>
 
     <string name="price_tracker_title">Suivi des prix</string>

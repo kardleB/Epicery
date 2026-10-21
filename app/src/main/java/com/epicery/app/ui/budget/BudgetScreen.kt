@@ -1,5 +1,6 @@
 package com.epicery.app.ui.budget
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.calculator.MonthlyBudgetStatus
+import com.epicery.app.domain.calculator.WeekSpending
 import com.epicery.app.ui.theme.EpiceryTheme
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -114,12 +117,98 @@ private fun BudgetContent(
             spendingByCategory = uiState.spendingByCategory,
             modifier = Modifier.fillMaxWidth()
         )
+        WeeklyExpensesCard(
+            weeks = uiState.weeks,
+            modifier = Modifier.fillMaxWidth()
+        )
         MonthlyProjectionCard(
             monthlyProjection = uiState.monthlyProjection,
             monthlyBudget = uiState.monthlyBudget,
             isOverProjection = uiState.isOverMonthlyProjection,
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+/**
+ * Lista "Gastos por semana": lo comprado en el mes agrupado de lunes a domingo, con el subtotal de
+ * cada semana; al tocar una semana se ven sus compras.
+ */
+@Composable
+private fun WeeklyExpensesCard(weeks: List<WeekSpending>, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = stringResource(R.string.budget_weeks_title), style = MaterialTheme.typography.titleMedium)
+            if (weeks.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.budget_weeks_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            } else {
+                weeks.forEach { week ->
+                    WeekRow(week = week)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeekRow(week: WeekSpending) {
+    var expanded by rememberSaveable(week.start.toString()) { mutableStateOf(false) }
+    val formatter = remember { DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+            .padding(top = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(
+                        R.string.budget_week_range,
+                        week.start.format(formatter),
+                        week.end.format(formatter)
+                    ),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.budget_week_items_count, week.entries.size),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(text = formatPrice(week.total), style = MaterialTheme.typography.titleMedium)
+        }
+        if (expanded) {
+            week.entries.forEach { entry ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, top = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = entry.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = formatPrice(entry.amount),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }
 

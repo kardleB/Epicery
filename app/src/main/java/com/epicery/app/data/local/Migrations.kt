@@ -160,9 +160,27 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
 }
 
 /**
+ * Migracion de la version 6 a la version 7, que agrega la tabla `expenses` con las compras ya
+ * terminadas ("Terminar compra"). Es aditiva: no toca las tablas existentes.
+ */
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `expenses` (" +
+                "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "`name` TEXT NOT NULL, " +
+                "`foodGroup` TEXT NOT NULL, " +
+                "`amount` REAL NOT NULL, " +
+                "`purchasedAt` INTEGER NOT NULL)"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_expenses_purchasedAt` ON `expenses` (`purchasedAt`)")
+    }
+}
+
+/**
  * Todas las migraciones conocidas de [AppDatabase], en orden. Cada vez que se
  * incremente `version` en [AppDatabase] hay que agregar aqui la migracion
  * correspondiente para que los datos existentes del usuario no se pierdan.
  */
 val APP_DATABASE_MIGRATIONS: Array<Migration> =
-    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
