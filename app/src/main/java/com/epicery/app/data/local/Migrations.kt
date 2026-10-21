@@ -128,8 +128,25 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
 }
 
 /**
+ * Migracion de la version 4 a la version 5, que agrega a `grocery_items` la fecha de compra
+ * (`purchasedAt`) y el precio realmente pagado (`pricePaid`) para poder calcular el gasto por
+ * semana y por mes. Es aditiva: no borra ni reescribe datos. Los items que ya estaban marcados
+ * como comprados reciben la fecha de la migracion, porque no se sabe cuando se compraron.
+ */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `grocery_items` ADD COLUMN `purchasedAt` INTEGER")
+        db.execSQL("ALTER TABLE `grocery_items` ADD COLUMN `pricePaid` REAL")
+        db.execSQL(
+            "UPDATE `grocery_items` SET `purchasedAt` = ${System.currentTimeMillis()} WHERE `isPurchased` = 1"
+        )
+    }
+}
+
+/**
  * Todas las migraciones conocidas de [AppDatabase], en orden. Cada vez que se
  * incremente `version` en [AppDatabase] hay que agregar aqui la migracion
  * correspondiente para que los datos existentes del usuario no se pierdan.
  */
-val APP_DATABASE_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+val APP_DATABASE_MIGRATIONS: Array<Migration> =
+    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)

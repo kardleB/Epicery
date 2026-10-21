@@ -10,5 +10,9 @@ data class GroceryItemEntity(
     val name: String,
     val foodGroup: String,
     val estimatedPrice: Double,
-    @ColumnInfo(defaultValue = "0") val isPurchased: Boolean = false
+    @ColumnInfo(defaultValue = "0") val isPurchased: Boolean = false,
+    /** Momento (epoch millis) en que se marco como comprado; `null` si no esta comprado. */
+    val purchasedAt: Long? = null,
+    /** Precio realmente pagado; `null` mientras no se haya registrado (se usa el estimado). */
+    val pricePaid: Double? = null
 )

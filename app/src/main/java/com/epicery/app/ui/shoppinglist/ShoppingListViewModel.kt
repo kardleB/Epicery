@@ -5,13 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.epicery.app.data.local.FoodGroup
 import com.epicery.app.domain.model.GroceryItem
 import com.epicery.app.domain.repository.GroceryRepository
-import com.epicery.app.domain.usecase.GetWeeklyBudgetUseCase
+import com.epicery.app.domain.repository.SettingsRepository
 import com.epicery.app.domain.usecase.SyncFoodItemToCatalogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,16 +20,15 @@ import javax.inject.Inject
 @HiltViewModel
 class ShoppingListViewModel @Inject constructor(
     private val groceryRepository: GroceryRepository,
-    private val getWeeklyBudgetUseCase: GetWeeklyBudgetUseCase,
+    settingsRepository: SettingsRepository,
     private val syncFoodItemToCatalogUseCase: SyncFoodItemToCatalogUseCase
 ) : ViewModel() {
 
-    private val weeklyBudget = MutableStateFlow(0.0)
     private val selectedFoodGroup = MutableStateFlow<FoodGroup?>(null)
 
     val uiState: StateFlow<ShoppingListUiState> = combine(
         groceryRepository.getGroceryItems(),
-        weeklyBudget,
+        settingsRepository.userSettings.map { it.defaultWeeklyBudget },
         selectedFoodGroup
     ) { items, budget, selectedGroup ->
         buildUiState(items, budget, selectedGroup)
@@ -37,12 +37,6 @@ class ShoppingListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
         initialValue = ShoppingListUiState()
     )
-
-    init {
-        viewModelScope.launch {
-            weeklyBudget.value = getWeeklyBudgetUseCase(ACTIVE_SHOPPING_LIST_ID)
-        }
-    }
 
     /** Filtra la lista por grupo alimenticio (CA1); `null` vuelve a mostrar todos los grupos. */
     fun selectFoodGroup(foodGroup: FoodGroup?) {
@@ -63,10 +57,20 @@ class ShoppingListViewModel @Inject constructor(
         }
     }
 
-    /** Marca/desmarca un item como comprado (CA1). */
+    /**
+     * Marca/desmarca un item como comprado (CA1). Al marcarlo guarda la fecha de compra (base del
+     * gasto por semana y por mes); al desmarcarlo la borra junto con el precio pagado.
+     */
     fun togglePurchased(item: GroceryItem) {
         viewModelScope.launch {
-            groceryRepository.updateGroceryItem(item.copy(isPurchased = !item.isPurchased))
+            val nowPurchased = !item.isPurchased
+            groceryRepository.updateGroceryItem(
+                item.copy(
+                    isPurchased = nowPurchased,
+                    purchasedAt = if (nowPurchased) System.currentTimeMillis() else null,
+                    pricePaid = if (nowPurchased) item.pricePaid else null
+                )
+            )
         }
     }
 
@@ -103,7 +107,6 @@ class ShoppingListViewModel @Inject constructor(
     }
 
     private companion object {
-        const val ACTIVE_SHOPPING_LIST_ID = 1L
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }

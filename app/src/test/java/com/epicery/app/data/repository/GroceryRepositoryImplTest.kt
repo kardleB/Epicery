@@ -48,6 +48,19 @@ class GroceryRepositoryImplTest {
     }
 
     @Test
+    fun `keeps the purchase date and the price paid when saving and reading an item`() = runBlocking {
+        val repository = GroceryRepositoryImpl(FakeGroceryItemDao())
+        repository.addGroceryItem(GroceryItem(name = "Manzana", foodGroup = "FRUITS", estimatedPrice = 3.50))
+        val apple = repository.getGroceryItems().first().single()
+
+        repository.updateGroceryItem(apple.copy(isPurchased = true, purchasedAt = 1_000L, pricePaid = 3.20))
+
+        val saved = repository.getGroceryItems().first().single()
+        assertEquals(1_000L, saved.purchasedAt)
+        assertEquals(3.20, saved.pricePaid!!, 0.0001)
+    }
+
+    @Test
     fun `accumulates items added one after another`() = runBlocking {
         val repository = GroceryRepositoryImpl(FakeGroceryItemDao())
 
