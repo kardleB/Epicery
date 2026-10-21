@@ -11,12 +11,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Verifica que "Terminar compra" archive solo lo comprado, con el monto pagado, y devuelva cuantos items movio. */
+/** Verifica que "Terminar compra" registre solo lo comprado, con el monto pagado, y devuelva cuantos items registro. */
 class ExpenseRepositoryImplTest {
 
     private class FakeExpenseDao : ExpenseDao() {
         val rows = MutableStateFlow<List<ExpenseEntity>>(emptyList())
-        var deletedIds: List<Long> = emptyList()
+        var resetIds: List<Long> = emptyList()
         var archiveCalls = 0
 
         override fun observeAll(): Flow<List<ExpenseEntity>> = rows
@@ -25,14 +25,14 @@ class ExpenseRepositoryImplTest {
             rows.value = rows.value + expenses.mapIndexed { i, e -> e.copy(id = rows.value.size + i + 1L) }
         }
 
-        override suspend fun deleteGroceryItems(ids: List<Long>) {
-            deletedIds = ids
+        override suspend fun resetGroceryItems(ids: List<Long>) {
+            resetIds = ids
         }
 
         override suspend fun archive(expenses: List<ExpenseEntity>, groceryItemIds: List<Long>) {
             archiveCalls++
             insertAll(expenses)
-            deleteGroceryItems(groceryItemIds)
+            resetGroceryItems(groceryItemIds)
         }
     }
 
@@ -40,7 +40,7 @@ class ExpenseRepositoryImplTest {
         GroceryItem(id, name, "FRUITS", price, isPurchased = purchased, purchasedAt = at, pricePaid = paid)
 
     @Test
-    fun `archives only the purchased items and removes exactly those from the list`() = runBlocking {
+    fun `records only the purchased items and resets exactly those in the list`() = runBlocking {
         val dao = FakeExpenseDao()
         val repository = ExpenseRepositoryImpl(dao)
         val items = listOf(
@@ -52,7 +52,7 @@ class ExpenseRepositoryImplTest {
         val archived = repository.archivePurchased(items, nowMillis = 9_999L)
 
         assertEquals(2, archived)
-        assertEquals(listOf(1L, 3L), dao.deletedIds)
+        assertEquals(listOf(1L, 3L), dao.resetIds)
         assertEquals(listOf("Manzanas", "Leche"), repository.observeExpenses().first().map { it.name })
     }
 

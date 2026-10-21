@@ -13,8 +13,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Verifica con Room real que [ExpenseDao.archive] pase los items a gastos y los quite de la lista
- * en una sola transaccion, sin tocar los items que no se archivan.
+ * Verifica con Room real que [ExpenseDao.archive] registre los gastos y deje los items en la lista,
+ * desmarcados y con su precio estimado, en una sola transaccion, sin tocar los items pendientes.
  */
 @RunWith(AndroidJUnit4::class)
 class ExpenseDaoTest {
@@ -35,9 +35,14 @@ class ExpenseDaoTest {
     }
 
     @Test
-    fun archive_movesPurchasedItemsToExpensesAndKeepsTheRest() = runTest {
+    fun archive_recordsTheExpenseAndKeepsTheListUncheckedWithItsPrices() = runTest {
         val groceryDao = database.groceryItemDao()
-        groceryDao.insert(GroceryItemEntity(name = "Manzanas", foodGroup = "FRUITS", estimatedPrice = 5.0, isPurchased = true, purchasedAt = 1_000L))
+        groceryDao.insert(
+            GroceryItemEntity(
+                name = "Manzanas", foodGroup = "FRUITS", estimatedPrice = 5.0,
+                isPurchased = true, purchasedAt = 1_000L, pricePaid = 4.5
+            )
+        )
         groceryDao.insert(GroceryItemEntity(name = "Pollo", foodGroup = "PROTEIN", estimatedPrice = 12.0))
         val items = groceryDao.getAll().first()
         val purchased = items.single { it.name == "Manzanas" }
@@ -47,7 +52,14 @@ class ExpenseDaoTest {
             groceryItemIds = listOf(purchased.id)
         )
 
-        assertEquals(listOf("Pollo"), groceryDao.getAll().first().map { it.name })
+        val list = groceryDao.getAll().first().associateBy { it.name }
+        assertEquals(setOf("Manzanas", "Pollo"), list.keys)
+        val apples = list.getValue("Manzanas")
+        assertEquals(false, apples.isPurchased)
+        assertEquals(null, apples.purchasedAt)
+        assertEquals(null, apples.pricePaid)
+        assertEquals(5.0, apples.estimatedPrice, 0.0001) // el precio que puso el usuario se conserva
+        assertEquals(12.0, list.getValue("Pollo").estimatedPrice, 0.0001)
         val expenses = database.expenseDao().observeAll().first()
         assertEquals(1, expenses.size)
         assertEquals("Manzanas", expenses.single().name)

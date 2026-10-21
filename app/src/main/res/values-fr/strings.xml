@@ -57,7 +57,7 @@
     <string name="budget_month_dialog_suggestion">Suggestion calculée à partir de votre budget hebdomadaire</string>
     <string name="shopping_finish_action">Terminer</string>
     <string name="shopping_finish_title">Terminer les achats</string>
-    <string name="shopping_finish_body">Les articles cochés (%1$d, %2$s) seront enregistrés dans les dépenses de la semaine et retirés de la liste. Les autres restent.</string>
+    <string name="shopping_finish_body">Les articles cochés (%1$d, %2$s) seront enregistrés dans les dépenses et décochés. Votre liste est conservée avec vos prix.</string>
     <string name="shopping_finish_confirm">Terminer</string>
     <string name="label_price_paid">Prix payé (facultatif)</string>
     <string name="budget_weeks_title">Dépenses par semaine</string>

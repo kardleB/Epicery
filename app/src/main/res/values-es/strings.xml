@@ -56,7 +56,7 @@
     <string name="budget_month_dialog_suggestion">Sugerencia calculada a partir de tu presupuesto semanal</string>
     <string name="shopping_finish_action">Terminar</string>
     <string name="shopping_finish_title">Terminar la compra</string>
-    <string name="shopping_finish_body">Los artículos marcados (%1$d, %2$s) se guardarán en los gastos de la semana y saldrán de la lista. Los demás se quedan.</string>
+    <string name="shopping_finish_body">Los artículos marcados (%1$d, %2$s) se guardarán en tus gastos y se desmarcarán. Tu lista se conserva con tus precios.</string>
     <string name="shopping_finish_confirm">Terminar</string>
     <string name="label_price_paid">Precio pagado (opcional)</string>
     <string name="budget_weeks_title">Gastos por semana</string>

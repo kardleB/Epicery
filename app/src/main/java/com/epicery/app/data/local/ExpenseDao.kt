@@ -14,16 +14,19 @@ abstract class ExpenseDao {
     @Insert
     abstract suspend fun insertAll(expenses: List<ExpenseEntity>)
 
-    @Query("DELETE FROM grocery_items WHERE id IN (:ids)")
-    abstract suspend fun deleteGroceryItems(ids: List<Long>)
+    @Query(
+        "UPDATE grocery_items SET isPurchased = 0, purchasedAt = NULL, pricePaid = NULL WHERE id IN (:ids)"
+    )
+    abstract suspend fun resetGroceryItems(ids: List<Long>)
 
     /**
-     * Pasa los items comprados a gastos y los quita de la lista en una sola transaccion: o se hacen
-     * las dos cosas o ninguna, asi una compra nunca queda duplicada ni se pierde.
+     * Guarda las compras como gastos y deja esos items en la lista, desmarcados y con el precio que
+     * el usuario puso, en una sola transaccion: o se hacen las dos cosas o ninguna, asi una compra
+     * nunca se cuenta dos veces ni se pierde.
      */
     @Transaction
     open suspend fun archive(expenses: List<ExpenseEntity>, groceryItemIds: List<Long>) {
         insertAll(expenses)
-        deleteGroceryItems(groceryItemIds)
+        resetGroceryItems(groceryItemIds)
     }
 }

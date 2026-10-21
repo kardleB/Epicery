@@ -56,7 +56,7 @@
     <string name="budget_month_dialog_suggestion">Suggestion based on your weekly budget</string>
     <string name="shopping_finish_action">Finish</string>
     <string name="shopping_finish_title">Finish shopping</string>
-    <string name="shopping_finish_body">The checked items (%1$d, %2$s) will be saved to this week\'s spending and removed from the list. The rest stay.</string>
+    <string name="shopping_finish_body">The checked items (%1$d, %2$s) will be saved to your spending and unchecked. Your list stays, with your prices.</string>
     <string name="shopping_finish_confirm">Finish</string>
     <string name="label_price_paid">Price paid (optional)</string>
     <string name="budget_weeks_title">Spending by week</string>

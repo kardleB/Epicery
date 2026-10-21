@@ -101,8 +101,9 @@ class ShoppingListViewModel @Inject constructor(
     }
 
     /**
-     * Termina la compra: los items marcados como comprados pasan a "Gastos por semana" con lo que se
-     * pago y salen de la lista; los pendientes se quedan.
+     * Termina la compra: lo marcado como comprado se registra en "Gastos por semana" con lo que se
+     * pago y la lista se conserva, desmarcada y con los precios que puso el usuario, lista para la
+     * proxima compra.
      */
     fun finishShopping() {
         viewModelScope.launch {

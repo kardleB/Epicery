@@ -10,8 +10,9 @@ interface ExpenseRepository {
 
     /**
      * Termina la compra: guarda como gastos los items de [items] que estan marcados como comprados
-     * (con el precio pagado si existe, si no el estimado) y los quita de la lista, todo en una
-     * transaccion. Un item marcado sin fecha usa [nowMillis]. Devuelve cuantos items se archivaron.
+     * (con el precio pagado si existe, si no el estimado) y los deja en la lista desmarcados, con su
+     * nombre, categoria y precio estimado intactos, todo en una transaccion. Un item marcado sin
+     * fecha usa [nowMillis]. Devuelve cuantos items se registraron.
      */
     suspend fun archivePurchased(items: List<GroceryItem>, nowMillis: Long): Int
 }
