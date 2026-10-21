@@ -8,6 +8,7 @@ import com.epicery.app.data.local.AppDatabase
 import com.epicery.app.data.local.FoodItemDao
 import com.epicery.app.data.local.GroceryItemDao
 import com.epicery.app.data.local.GroceryPriceCacheDao
+import com.epicery.app.data.local.MonthlyBudgetDao
 import com.epicery.app.data.local.PriceHistoryDao
 import com.epicery.app.data.local.ShoppingListDao
 import com.epicery.app.data.local.UsdaNutritionCacheDao
@@ -60,4 +61,7 @@ object DatabaseModule {
     @Provides
     fun provideGroceryPriceCacheDao(database: AppDatabase): GroceryPriceCacheDao =
         database.groceryPriceCacheDao()
+
+    @Provides
+    fun provideMonthlyBudgetDao(database: AppDatabase): MonthlyBudgetDao = database.monthlyBudgetDao()
 }

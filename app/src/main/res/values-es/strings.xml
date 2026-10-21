@@ -37,12 +37,23 @@
     <string name="budget_title">Presupuesto</string>
     <string name="budget_monthly_projection_title">Proyección mensual</string>
     <string name="budget_monthly_projection_body">%1$s estimados este mes, según el ritmo de gasto semanal</string>
-    <string name="budget_monthly_budget_estimate">Presupuesto mensual estimado: %1$s</string>
+    <string name="budget_monthly_budget_estimate">Presupuesto del mes: %1$s</string>
     <string name="budget_monthly_over">La proyección supera el presupuesto mensual por %1$s</string>
     <string name="budget_weekly_spent_title">Gasto semanal</string>
     <string name="budget_remaining">Restan %1$s esta semana</string>
     <string name="budget_over">Superaste el presupuesto semanal por %1$s</string>
     <string name="budget_spending_by_category_title">Gasto por categoría</string>
+    <string name="budget_month_title">Presupuesto del mes</string>
+    <string name="budget_month_not_set">Todavía no has definido un presupuesto para este mes</string>
+    <string name="budget_month_set_button">Definir presupuesto</string>
+    <string name="budget_month_edit_button">Editar</string>
+    <string name="budget_month_copy_previous">Reutilizar %1$s del mes anterior</string>
+    <string name="budget_month_remaining">Te quedan %1$s este mes</string>
+    <string name="budget_month_over">Te pasaste del presupuesto del mes por %1$s</string>
+    <string name="budget_month_warning">Atención: has usado el %1$d %% del presupuesto del mes</string>
+    <string name="budget_month_dialog_title">Presupuesto del mes</string>
+    <string name="budget_month_dialog_label">Monto ($ CAD)</string>
+    <string name="budget_month_dialog_suggestion">Sugerencia calculada a partir de tu presupuesto semanal</string>
     <string name="budget_no_purchases">Todavía no marcaste ningún item como comprado</string>
 
     <string name="price_tracker_title">Seguimiento de precios</string>

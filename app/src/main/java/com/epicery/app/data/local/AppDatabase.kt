@@ -12,9 +12,10 @@ import androidx.room.TypeConverters
         ShoppingListEntity::class,
         ShoppingListItemEntity::class,
         UsdaNutritionCacheEntity::class,
-        GroceryPriceCacheEntity::class
+        GroceryPriceCacheEntity::class,
+        MonthlyBudgetEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 @TypeConverters(FoodGroupConverter::class)
@@ -25,4 +26,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun shoppingListDao(): ShoppingListDao
     abstract fun usdaNutritionCacheDao(): UsdaNutritionCacheDao
     abstract fun groceryPriceCacheDao(): GroceryPriceCacheDao
+    abstract fun monthlyBudgetDao(): MonthlyBudgetDao
 }

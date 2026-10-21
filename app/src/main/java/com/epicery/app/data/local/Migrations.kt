@@ -144,9 +144,25 @@ val MIGRATION_4_5 = object : Migration(4, 5) {
 }
 
 /**
+ * Migracion de la version 5 a la version 6, que agrega la tabla `monthly_budgets` con el
+ * presupuesto de cada mes (clave `yyyy-MM`). Es aditiva: no toca las tablas existentes.
+ */
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `monthly_budgets` (" +
+                "`yearMonth` TEXT NOT NULL, " +
+                "`amount` REAL NOT NULL, " +
+                "`updatedAt` INTEGER NOT NULL, " +
+                "PRIMARY KEY(`yearMonth`))"
+        )
+    }
+}
+
+/**
  * Todas las migraciones conocidas de [AppDatabase], en orden. Cada vez que se
  * incremente `version` en [AppDatabase] hay que agregar aqui la migracion
  * correspondiente para que los datos existentes del usuario no se pierdan.
  */
 val APP_DATABASE_MIGRATIONS: Array<Migration> =
-    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+    arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)

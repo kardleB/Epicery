@@ -3,38 +3,54 @@ package com.epicery.app.ui.budget
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.epicery.app.R
 import com.epicery.app.data.local.FoodGroup
+import com.epicery.app.domain.calculator.MonthlyBudgetStatus
 import com.epicery.app.ui.theme.EpiceryTheme
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
- * Pantalla de Budget (ver `docs/design/wireframes.md`, sección "4. Budget"): dashboard del gasto
- * semanal acumulado de la lista activa ([BudgetProgress]), gráfico de gastos por categoría
- * ([CategorySpendingChart]) y proyección de gasto mensual ([MonthlyProjectionCard]), todo
- * actualizado en tiempo real a partir del `Flow` de items de la lista (RF4, CA3).
+ * Pantalla de Budget (ver `docs/design/wireframes.md`, sección "4. Budget"): presupuesto del mes
+ * ([MonthlyBudgetCard]), dashboard del gasto semanal ([BudgetProgress]), gráfico de gastos por
+ * categoría ([CategorySpendingChart]) y proyección de gasto mensual ([MonthlyProjectionCard]),
+ * todo actualizado en tiempo real a partir del `Flow` de items de la lista (RF4, CA3).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +78,7 @@ fun BudgetScreen(
         } else {
             BudgetContent(
                 uiState = uiState,
+                onSaveMonthlyBudget = viewModel::saveMonthlyBudget,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -71,7 +88,11 @@ fun BudgetScreen(
 }
 
 @Composable
-private fun BudgetContent(uiState: BudgetUiState, modifier: Modifier = Modifier) {
+private fun BudgetContent(
+    uiState: BudgetUiState,
+    onSaveMonthlyBudget: (Double) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -79,6 +100,11 @@ private fun BudgetContent(uiState: BudgetUiState, modifier: Modifier = Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        MonthlyBudgetCard(
+            uiState = uiState,
+            onSaveMonthlyBudget = onSaveMonthlyBudget,
+            modifier = Modifier.fillMaxWidth()
+        )
         BudgetProgress(
             weeklySpent = uiState.weeklySpent,
             weeklyBudget = uiState.weeklyBudget,
@@ -95,6 +121,172 @@ private fun BudgetContent(uiState: BudgetUiState, modifier: Modifier = Modifier)
             modifier = Modifier.fillMaxWidth()
         )
     }
+}
+
+/**
+ * Presupuesto del mes: lo que se ha gastado frente al monto definido por el usuario, con aviso al
+ * llegar al 80 % y al pasarse. Si todavia no hay presupuesto ofrece definirlo (o reutilizar el del
+ * mes anterior).
+ */
+@Composable
+private fun MonthlyBudgetCard(
+    uiState: BudgetUiState,
+    onSaveMonthlyBudget: (Double) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+
+    Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = stringResource(R.string.budget_month_title), style = MaterialTheme.typography.titleMedium)
+            uiState.month?.let { month ->
+                Text(
+                    text = monthLabel(month),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (uiState.isMonthlyBudgetSet) {
+                val status = uiState.monthlyStatus
+                val statusColor = when (status) {
+                    MonthlyBudgetStatus.OVER -> MaterialTheme.colorScheme.error
+                    MonthlyBudgetStatus.WARNING -> MaterialTheme.colorScheme.tertiary
+                    else -> MaterialTheme.colorScheme.primary
+                }
+                LinearProgressIndicator(
+                    progress = { uiState.monthlyProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 12.dp)
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(5.dp)),
+                    color = statusColor
+                )
+                Text(
+                    text = stringResource(
+                        R.string.format_amount_of_amount,
+                        formatPrice(uiState.monthlySpent),
+                        formatPrice(uiState.monthlyBudget)
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                val remaining = uiState.monthlyRemaining
+                Text(
+                    text = if (remaining >= 0) {
+                        stringResource(R.string.budget_month_remaining, formatPrice(remaining))
+                    } else {
+                        stringResource(R.string.budget_month_over, formatPrice(-remaining))
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (status == MonthlyBudgetStatus.ON_TRACK) MaterialTheme.colorScheme.onSurfaceVariant else statusColor,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                if (status == MonthlyBudgetStatus.WARNING) {
+                    Text(
+                        text = stringResource(R.string.budget_month_warning, uiState.monthlyPercentUsed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = statusColor,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = { showDialog = true }) {
+                        Text(stringResource(R.string.budget_month_edit_button))
+                    }
+                }
+            } else {
+                Text(
+                    text = stringResource(R.string.budget_month_not_set),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Button(onClick = { showDialog = true }) {
+                        Text(stringResource(R.string.budget_month_set_button))
+                    }
+                    if (uiState.previousMonthlyBudget > 0) {
+                        TextButton(onClick = { onSaveMonthlyBudget(uiState.previousMonthlyBudget) }) {
+                            Text(stringResource(R.string.budget_month_copy_previous, formatPrice(uiState.previousMonthlyBudget)))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showDialog) {
+        MonthlyBudgetDialog(
+            initialAmount = if (uiState.isMonthlyBudgetSet) uiState.monthlyBudget else uiState.suggestedMonthlyBudget,
+            isSuggestion = !uiState.isMonthlyBudgetSet && uiState.suggestedMonthlyBudget > 0,
+            onConfirm = { amount ->
+                onSaveMonthlyBudget(amount)
+                showDialog = false
+            },
+            onDismiss = { showDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun MonthlyBudgetDialog(
+    initialAmount: Double,
+    isSuggestion: Boolean,
+    onConfirm: (Double) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var amountText by rememberSaveable {
+        mutableStateOf(if (initialAmount > 0) "%.2f".format(Locale.ROOT, initialAmount) else "")
+    }
+    val amount = amountText.replace(',', '.').toDoubleOrNull()
+    val isValid = amount != null && amount > 0 && amount.isFinite()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.budget_month_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = { amountText = it },
+                    label = { Text(stringResource(R.string.budget_month_dialog_label)) },
+                    singleLine = true,
+                    isError = amountText.isNotBlank() && !isValid,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (isSuggestion) {
+                    Text(
+                        text = stringResource(R.string.budget_month_dialog_suggestion),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(enabled = isValid, onClick = { amount?.let(onConfirm) }) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+        }
+    )
+}
+
+@Composable
+private fun monthLabel(month: YearMonth): String {
+    val locale = Locale.getDefault()
+    return month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))
+        .replaceFirstChar { it.titlecase(locale) }
 }
 
 @Composable
@@ -151,8 +343,12 @@ private fun BudgetContentPreview() {
                     FoodGroup.FRUITS to 20.0,
                     FoodGroup.PROTEIN to 45.0
                 ),
-                monthlyProjection = 65.0 * BudgetUiState.WEEKS_PER_MONTH
-            )
+                monthlyProjection = 65.0 * BudgetUiState.WEEKS_PER_MONTH,
+                month = YearMonth.of(2026, 10),
+                monthlyBudget = 400.0,
+                monthlySpent = 330.0
+            ),
+            onSaveMonthlyBudget = {}
         )
     }
 }
